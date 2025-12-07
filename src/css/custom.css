@@ -1,0 +1,101 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* You can override the classic template styling here. */
+:root {
+  --ifm-color-primary: #25c2a0;
+  --ifm-color-primary-dark: #21af90;
+  --ifm-color-primary-darker: #1fa588;
+  --ifm-color-primary-darkest: #1a8870;
+  --ifm-color-primary-light: #29d5b0;
+  --ifm-color-primary-lighter: #32d8b4;
+  --ifm-color-primary-lightest: #4fddbf;
+  --ifm-code-font-size: 95%;
+}
+
+.docusaurus-highlight-code-line {
+  background-color: rgba(0, 0, 0, 0.1);
+  display: block;
+  margin: 0 calc(-1 * var(--ifm-pre-padding));
+  padding: 0 var(--ifm-pre-padding);
+}
+
+html[data-theme='dark'] .docusaurus-highlight-code-line {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Custom styles for textbook */
+.textbook-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.learning-objectives {
+  background-color: #f0f8ff;
+  border-left: 4px solid #25c2a0;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.code-examples {
+  background-color: #f8f8f8;
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+.troubleshooting-tips {
+  background-color: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.centeredSection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Footer styling to match hero section */
+.footer {
+  background-color: var(--ifm-color-primary) !important;
+  color: var(--ifm-color-white) !important;
+}
+
+.footer--dark {
+  --ifm-footer-background-color: var(--ifm-color-primary);
+  --ifm-footer-color: var(--ifm-color-white);
+  --ifm-footer-link-color: var(--ifm-color-white);
+  --ifm-footer-title-color: var(--ifm-color-white);
+  --ifm-footer-logo-filter: none;
+}
+
+.footer__title {
+  color: var(--ifm-color-white) !important;
+}
+
+.footer__link-item {
+  color: var(--ifm-color-white) !important;
+}
+
+.footer__copyright {
+  color: var(--ifm-color-white) !important;
+  opacity: 0.8;
+  background-color: var(--ifm-color-primary-darker) !important;
+}
+
+/* Dark mode compatibility for sections */
+html[data-theme='dark'] .margin-vert--xl {
+  background-color: #242526;
+}
+
+html[data-theme='dark'] .margin-vert--xl h2 {
+  color: #ffffff;
+}
+
+html[data-theme='dark'] .margin-vert--xl p {
+  color: #d0d0d0;
+}

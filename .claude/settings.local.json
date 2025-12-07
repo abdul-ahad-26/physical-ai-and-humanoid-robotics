@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git --version)",
+      "Bash(git rev-parse --is-inside-work-tree)",
+      "Bash(git rev-parse --abbrev-ref HEAD)",
+      "Bash(git checkout -b add-physical-ai-textbook-constitution)",
+      "Bash(git add .specify/memory/constitution.md history/)",
+      "Bash(git commit -m \"feat(constitution): add Physical AI & Humanoid Robotics textbook constitution\n\n- Create comprehensive constitution file for the textbook project\n- Establish core principles for spec-driven development\n- Define technology standards and development workflow\n- Add governance procedures for the project\n- Create initial PHR for constitution creation\")",
+      "Bash(git remote add origin https://github.com/abdul-ahad-26/physical-ai-and-humanoid-robotics.git)",
+      "Bash(git push -u origin add-physical-ai-textbook-constitution)",
+      "Bash(git fetch --all --prune)",
+      "Bash(.specify/scripts/bash/create-new-feature.sh --json \"Project Name:\nPhysical AI & Humanoid Robotics — AI-Native Technical Textbook\n\nProject Goal:\nDevelop a complete AI-native textbook for the Physical AI & Humanoid Robotics course using Docusaurus, Claude Code CLI, and Spec-Kit Plus. The book must reflect the entire course curriculum and support later integration of RAG chatbots, personalization engines, and agent-driven extensions.\n\n1. Core Objectives\n\nProduce a full Docusaurus-based textbook covering:\n\nPhysical AI and embodied intelligence\n\nROS 2 fundamentals\n\nGazebo & Unity digital twin simulation\n\nNVIDIA Isaac Sim & Isaac ROS\n\nVLA (Vision-Language-Action) systems\n\nConversational robotics workflows\n\nCapstone humanoid robot project\n\nHardware + lab architecture\n\nUse Spec-Kit Plus to manage all development:\n\nConstitution → Specs → Plans → Commits\n\nModular, agent-extensible chapter structure\n\nClean separation of content specs & implementation\n\nCreate high-quality, deeply technical educational content with:\n\nLearning outcomes\n\nHands-on labs\n\nStep-by-step workflows\n\nSetup instructions\n\nPython, ROS 2, and Isaac SDK code snippets\n\nSimulation exercises\n\nCapstone instructions\n\nStructure chapters for future AI features:\n\nRAG-based reading assistant\n\nUser-personalized content modes\n\nUrdu translation mode\n\nSubagent-generated expansions\n\n2. Deliverables\nA. Textbook Structure\n\nA complete directory and chapter spec covering:\n\nIntroduction to Physical AI\n\nEmbodied Intelligence Concepts\n\nSensor Fundamentals (LiDAR, Cameras, IMUs)\n\nROS 2 Foundations\n\nROS 2 Packages & Nodes\n\nURDF/SDF & Robot Description\n\nGazebo Simulation\n\nUnity Visualization Pipeline\n\nNVIDIA Isaac Sim\n\nIsaac ROS (VSLAM, Navigation)\n\nVLA Systems (LLM + Vision + Action)\n\nConversational Robotics (Whisper + GPT + ROS 2)\n\nHumanoid Kinematics & Locomotion\n\nManipulation & Grasping\n\nHuman–Robot Interaction (HRI)\n\nCapstone: Autonomous Humanoid Robot\n\nHardware Requirements & Lab Architecture\n\nCloud vs. On-Prem Physical AI Lab\n\nEach chapter must come with:\n\nDescription\n\nLearning objectives\n\nPractical exercises\n\nTroubleshooting tips\n\nCode examples\n\nSimulation tasks\n\nVisual diagram placeholders\n\n3. Functional Requirements\n3.1 Technical Content\n\nEnsure technical accuracy for ROS 2 (Humble/Iron), Gazebo, Unity, Isaac Sim, and NVIDIA hardware.\n\nInclude command-line workflows, installation steps, and environment setup.\n\nIntegrate real robotics examples, not abstract theory.\n\n3.2 Formatting Requirements\n\nConsistent heading hierarchy\n\nClean syntax-highlighted code blocks\n\nMarkdown-friendly diagrams\n\nTables, callouts, and side notes\n\n3.3 Writing Style\n\nClear, technical, authoritative\n\nBeginner-friendly onboarding, expert-level depth\n\nNo fluff or filler\n\nStep-by-step instructions\n\nSolve real engineering tasks\n\n4. Non-Functional Requirements\n\nMust be fully compatible with Docusaurus v3.\n\nModular enough for incremental spec → commit workflow.\n\nContent must be agent-extensible for future chapters.\n\nNo deployment instructions; the user will handle deployment.\n\nAvoid external dependencies not required by the course stack.\n\n5. Success Criteria\n\nThe output of this spec should enable:\n\nImmediate generation of /sp.plan\n\nSmooth Claude Code development cycles\n\nClean separation of content and implementation\n\nA complete, high-quality textbook ready for enhancement\" --number 1 --short-name \"ai-textbook\")",
+      "Bash(.specify/scripts/bash/setup-plan.sh --json)",
+      "Bash(.specify/scripts/bash/update-agent-context.sh claude)",
+      "Bash(.specify/scripts/bash/check-prerequisites.sh --json)",
+      "Bash(.specify/scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks)",
+      "Bash(git rev-parse --git-dir)",
+      "Bash(npm init -y)",
+      "Bash(npx create-docusaurus@latest . textbook --typescript=false)",
+      "Bash(npx create-docusaurus@latest . textbook)",
+      "Bash(npm install @docusaurus/core@latest @docusaurus/preset-classic@latest @mdx-js/react@latest)",
+      "Bash(npm install @docusaurus/core@latest)",
+      "Bash(npm run build)",
+      "Bash(mkdir -p docs/img/diagrams assets/diagrams)",
+      "Bash(npm install)",
+      "Bash(npx docusaurus clear)",
+      "Bash(git add .)",
+      "Bash(git commit -m \"feat(homepage): add home page with logo and footer styling\n\n- Create comprehensive home page with hero section and feature highlights\n- Add logo and favicon assets to static directory\n- Style footer to match hero section with green color theme\n- Implement dark mode compatibility for all sections\n- Fix MDX compilation errors and broken image links\n- Update navigation and layout for better user experience\")",
+      "Bash(git push -u origin 001-ai-textbook)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
