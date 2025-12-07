@@ -1,55 +1,76 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!-- SYNC IMPACT REPORT:
+Version change: 1.0.0 → 1.0.0 (initial creation)
+Modified principles: N/A (new file)
+Added sections: All sections (new constitution)
+Removed sections: N/A
+Templates requiring updates:
+  - ✅ .specify/templates/plan-template.md (to align with new principles)
+  - ✅ .specify/templates/spec-template.md (to align with new principles)
+  - ✅ .specify/templates/tasks-template.md (to align with new principles)
+  - ⚠ .specify/templates/commands/*.md (review needed for alignment)
+  - ⚠ README.md (review needed for alignment)
+Follow-up TODOs: None
+-->
+
+# Physical AI & Humanoid Robotics — AI-Native Technical Textbook Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Spec-Driven Development (NON-NEGOTIABLE)
+All textbook content and structure must follow Spec-Kit Plus methodology: specs → plans → tasks → commits. Every chapter, section, and technical explanation must be fully specified before implementation. No content should be written without proper specification and architectural planning.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Technical Accuracy & Educational Clarity
+All content must be technically accurate with working code examples, verified commands, and step-by-step instructions. Content must serve both human learners and AI agents - clear, precise, and actionable. Every technical claim must be verifiable through practical implementation.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Modularity & Reusability
+Textbook content must be modular, with each chapter, section, and example designed for independent use and recombination. Content should support personalization, translation, and extension by both human instructors and AI agents. Clear interfaces between modules with minimal coupling.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Docusaurus-First Architecture
+All content must be structured for Docusaurus consumption with proper navigation, search, and cross-linking. Content organization must follow Docusaurus best practices for documentation sites. Markdown-first approach with support for interactive elements and code examples.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. AI-Native Content Design
+Content must be optimized for AI consumption with clear structure, consistent formatting, and semantic markup. Content should support RAG (Retrieval Augmented Generation) systems and be suitable for fine-tuning language models. Proper metadata and tagging for AI processing.
 
-### [PRINCIPLE_6_NAME]
+### VI. Practical Application Focus
+Every concept must include practical examples, hands-on exercises, and real-world workflows. No theoretical content without corresponding implementation. Each chapter must include learning outcomes, hands-on tasks, and checkpoints. Prioritize real commands, workflows, and actionable steps over abstract concepts.
 
+## Technology & Content Standards
 
-[PRINCIPLE__DESCRIPTION]
+### Technical Requirements
+- Content must support ROS 2, Gazebo, Unity, NVIDIA Isaac, and VLA systems
+- Code snippets in Python, ROS 2, and Isaac environment formats
+- Hardware requirements and lab architecture specifications
+- Cloud vs. on-premise workflow documentation
+- Setup guides, practical exercises, milestone projects
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+### Writing Style Guidelines
+- Clear, technical, educational, and precise language
+- Consistent formatting for headings, examples, and reference material
+- Proper code syntax highlighting and documentation
+- Diagram placeholders for visual content
+- Step-by-step instructions with expected outcomes
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+## Development Workflow
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+### Content Creation Process
+All content must follow the Spec-Kit Plus workflow: specification → planning → task breakdown → implementation. Each chapter must have a complete spec before writing begins. Content must be reviewed by both technical and educational experts before acceptance.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+### Quality Gates
+- Technical accuracy verification through implementation
+- Educational effectiveness testing with target audience
+- Code examples must be runnable and produce expected results
+- Cross-references and navigation must function correctly
+- Accessibility standards compliance
+
+### Review Process
+- Technical review by domain experts
+- Educational review by curriculum specialists
+- AI-readability assessment
+- Integration testing with Docusaurus build
+- Accessibility compliance verification
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution governs all aspects of the Physical AI & Humanoid Robotics textbook development. All content, structure, and process decisions must align with these principles. Amendments require documentation of rationale, approval from project maintainers, and migration plan for existing content. All pull requests and reviews must verify compliance with these principles. Complexity must be justified by educational or technical necessity. Use this constitution for all development guidance and decision-making.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2025-12-07 | **Last Amended**: 2025-12-07
