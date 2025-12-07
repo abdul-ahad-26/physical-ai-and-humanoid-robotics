@@ -1,0 +1,291 @@
+openapi: 3.0.0
+info:
+  title: Physical AI & Humanoid Robotics Textbook API
+  description: API for textbook content access, search, and AI integration features
+  version: 1.0.0
+  contact:
+    name: Textbook Development Team
+    email: textbook@physical-ai-robotics.org
+
+servers:
+  - url: https://api.physical-ai-textbook.com/v1
+    description: Production server
+  - url: https://staging-api.physical-ai-textbook.com/v1
+    description: Staging server
+
+paths:
+  /chapters:
+    get:
+      summary: List all textbook chapters
+      description: Retrieve a list of all available textbook chapters with metadata
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of chapters to return
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          description: Number of chapters to skip
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: topic
+          in: query
+          description: Filter chapters by topic
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of chapters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  chapters:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Chapter'
+                  total:
+                    type: integer
+                  offset:
+                    type: integer
+        '400':
+          description: Invalid parameters
+
+  /chapters/{chapterId}:
+    get:
+      summary: Get a specific chapter
+      description: Retrieve detailed information about a specific textbook chapter
+      parameters:
+        - name: chapterId
+          in: path
+          required: true
+          description: Unique identifier for the chapter
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Chapter details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chapter'
+        '404':
+          description: Chapter not found
+
+  /search:
+    get:
+      summary: Search textbook content
+      description: Search across all textbook content for relevant information
+      parameters:
+        - name: query
+          in: query
+          required: true
+          description: Search query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Maximum number of results to return
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SearchResult'
+                  total:
+                    type: integer
+        '400':
+          description: Invalid search query
+
+  /chapters/{chapterId}/lab:
+    get:
+      summary: Get chapter lab exercises
+      description: Retrieve hands-on exercises for a specific chapter
+      parameters:
+        - name: chapterId
+          in: path
+          required: true
+          description: Unique identifier for the chapter
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lab exercises for the chapter
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LabExercise'
+        '404':
+          description: Chapter or lab exercises not found
+
+components:
+  schemas:
+    Chapter:
+      type: object
+      required:
+        - id
+        - title
+        - topic
+        - content
+        - learningObjectives
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the chapter
+        title:
+          type: string
+          description: Chapter title
+        topic:
+          type: string
+          description: Main topic of the chapter
+        description:
+          type: string
+          description: Brief description of the chapter
+        content:
+          type: string
+          description: Main chapter content in Markdown format
+        learningObjectives:
+          type: array
+          description: List of learning objectives
+          items:
+            type: string
+        prerequisites:
+          type: array
+          description: Prerequisite knowledge or chapters
+          items:
+            type: string
+        relatedChapters:
+          type: array
+          description: IDs of related chapters
+          items:
+            type: string
+        codeExamples:
+          type: array
+          description: Code examples in the chapter
+          items:
+            $ref: '#/components/schemas/CodeExample'
+        createdAt:
+          type: string
+          format: date-time
+          description: When the chapter was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: When the chapter was last updated
+
+    CodeExample:
+      type: object
+      required:
+        - id
+        - language
+        - code
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the code example
+        language:
+          type: string
+          description: Programming language
+        code:
+          type: string
+          description: The actual code snippet
+        description:
+          type: string
+          description: Explanation of what the code does
+        tags:
+          type: array
+          description: Keywords for categorization
+          items:
+            type: string
+
+    LabExercise:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - steps
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the lab exercise
+        title:
+          type: string
+          description: Exercise title
+        description:
+          type: string
+          description: Detailed instructions for the exercise
+        objectives:
+          type: array
+          description: What the student should learn
+          items:
+            type: string
+        prerequisites:
+          type: array
+          description: What is needed to complete the exercise
+          items:
+            type: string
+        steps:
+          type: array
+          description: Sequential steps to complete the exercise
+          items:
+            type: object
+            properties:
+              stepNumber:
+                type: integer
+              instruction:
+                type: string
+        expectedResults:
+          type: string
+          description: What the student should expect to see
+
+    SearchResult:
+      type: object
+      required:
+        - id
+        - title
+        - content
+        - score
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the result
+        title:
+          type: string
+          description: Title of the result
+        content:
+          type: string
+          description: Excerpt of the relevant content
+        chapterId:
+          type: string
+          description: ID of the chapter containing the result
+        chapterTitle:
+          type: string
+          description: Title of the chapter containing the result
+        score:
+          type: number
+          description: Relevance score (0-1)
