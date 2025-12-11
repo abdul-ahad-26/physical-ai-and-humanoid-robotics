@@ -27,7 +27,9 @@
       "Bash(npx docusaurus clear)",
       "Bash(git add .)",
       "Bash(git commit -m \"feat(homepage): add home page with logo and footer styling\n\n- Create comprehensive home page with hero section and feature highlights\n- Add logo and favicon assets to static directory\n- Style footer to match hero section with green color theme\n- Implement dark mode compatibility for all sections\n- Fix MDX compilation errors and broken image links\n- Update navigation and layout for better user experience\")",
-      "Bash(git push -u origin 001-ai-textbook)"
+      "Bash(git push -u origin 001-ai-textbook)",
+      "Bash(curl -s http://localhost:8000/health)",
+      "Bash(python3 -m json.tool)"
     ],
     "deny": [],
     "ask": []

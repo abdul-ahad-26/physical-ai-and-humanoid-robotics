@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "src/api/main.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "src/api/main.py"
+    }
+  ],
+  "env": {
+    "NEON_DB_URL": "@neon_db_url",
+    "QDRANT_URL": "@qdrant_url",
+    "OPENAI_API_KEY": "@openai_api_key",
+    "GEMINI_API_KEY": "@gemini_api_key",
+    "REDIS_URL": "@redis_url"
+  }
+}

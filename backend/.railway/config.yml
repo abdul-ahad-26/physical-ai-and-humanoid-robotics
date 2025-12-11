@@ -1,0 +1,36 @@
+projectConfig:
+  projectId: "ai-textbook-backend"
+  environmentId: "production"
+
+services:
+  - name: backend
+    runtime: "CONTAINER"
+    buildType: "DOCKER"
+    dockerfilePath: "./Dockerfile"
+    buildContext: "."
+    command: "uvicorn src.api.main:app --host 0.0.0.0 --port $PORT"
+    ports:
+      - port: 8000
+        protocol: "http"
+        name: "http"
+    envVars:
+      - key: "NEON_DB_URL"
+        value: ""
+        required: true
+        secret: true
+      - key: "QDRANT_URL"
+        value: ""
+        required: true
+        secret: true
+      - key: "OPENAI_API_KEY"
+        value: ""
+        required: true
+        secret: true
+      - key: "GEMINI_API_KEY"
+        value: ""
+        required: true
+        secret: true
+      - key: "REDIS_URL"
+        value: ""
+        required: true
+        secret: true

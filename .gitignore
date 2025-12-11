@@ -1,10 +1,51 @@
 # Dependencies
 node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+.venv/
+env.bak/
+venv.bak/
 
 # Build outputs
 build/
 dist/
 out/
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+.Python
+cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.coverage.xml
+.nosetests.xml
+coverage.xml
+.installed.cfg
+lib/
+lib64/
+pip-delete-this-directory.txt
+.eggs/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+bin/
+Scripts/
+*.egg-info/
+.installed.cfg
+*.egg
 
 # Environment variables
 .env*
