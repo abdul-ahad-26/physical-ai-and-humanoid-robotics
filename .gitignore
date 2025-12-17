@@ -1,53 +1,223 @@
+# ============================================================================
+# Node.js / Frontend (Docusaurus)
+# ============================================================================
+
 # Dependencies
 node_modules/
+.pnp/
+.pnp.js
 
 # Build outputs
 build/
 dist/
 out/
-
-# Environment variables
-.env*
-!.env.example
-
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Docusaurus
+.next/
 .docusaurus/
+.cache/
+
+# Docusaurus specific
 .sass-cache/
 .checkout/
 .lock/
 
-# OS generated files
+# ============================================================================
+# Python / Backend (FastAPI)
+# ============================================================================
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+.virtualenv/
+
+# Python distribution / packaging
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.whl
+
+# Testing and coverage
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+coverage/
+.nyc_output/
+*.cover
+
+# Type checkers
+.pytype/
+dmypy.json
+dmypy.json
+
+# UV lock files
+uv.lock
+
+# ============================================================================
+# Environment Variables & Secrets
+# ============================================================================
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.*.local
+!.env.example
+
+# ============================================================================
+# Logs
+# ============================================================================
+
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ============================================================================
+# OS Generated Files
+# ============================================================================
+
+# macOS
 .DS_Store
 .DS_Store?
 ._*
+.AppleDouble
+.LSOverride
 .Spotlight-V100
 .Trashes
-ehthumbs.db
-Thumbs.db
 
-# Editor
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ============================================================================
+# IDEs and Editors
+# ============================================================================
+
+# VSCode
 .vscode/
+*.code-workspace
+
+# JetBrains (PyCharm, WebStorm, IntelliJ)
 .idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Vim
 *.swp
 *.swo
+*.swn
 *~
 
-# Testing
-coverage/
-.nyc_output/
+# Emacs
+*~
+\#*\#
+.\#*
 
-# Package manager
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# ============================================================================
+# Package Managers
+# ============================================================================
+
+# npm
 package-lock.json
-yarn.lock
-pnpm-lock.yaml
+npm-debug.log*
+node_modules/
 
-# CI/CD
-.github/
-.circleci/
-.travis.yml
+# Yarn
+yarn.lock
+yarn-debug.log*
+yarn-error.log*
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# pnpm
+pnpm-lock.yaml
+.pnpm-debug.log*
+
+# ============================================================================
+# Databases and Data
+# ============================================================================
+
+# SQLite
+*.db
+*.sqlite
+*.sqlite3
+
+# PostgreSQL
+*.pgdata/
+pg_data/
+
+# ============================================================================
+# Docker
+# ============================================================================
+
+# Docker volumes
+docker-compose.override.yml
+.dockerignore
+
+# ============================================================================
+# Temporary Files
+# ============================================================================
+
+# Temporary directories
+tmp/
+temp/
+.tmp/
+
+# ============================================================================
+# Project Specific
+# ============================================================================
+
+# SpecKit Plus (keep templates and scripts, ignore generated files if any)
+# .specify/ - kept in version control
+
+# Keep example files
+!.env.example
+!.dockerignore
