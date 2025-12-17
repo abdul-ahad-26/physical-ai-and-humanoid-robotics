@@ -212,6 +212,8 @@ See `.specify/memory/constitution.md` for code quality, testing, performance, se
 ## Active Technologies
 - Markdown, JavaScript (Node.js 18+ for Docusaurus), Python 3.8+ for code examples + Docusaurus v3, React, Node.js, npm/yarn (001-ai-textbook)
 - File-based (Markdown content, assets, code samples) (001-ai-textbook)
+- Python 3.11 (backend), TypeScript/JavaScript (frontend) + FastAPI, OpenAI Agents SDK, Qdrant Client, asyncpg, ChatKit, Better Auth (002-rag-chatbot)
+- Neon Serverless Postgres (relational), Qdrant Cloud (vectors) (002-rag-chatbot)
 
 ## Recent Changes
 - 001-ai-textbook: Added Markdown, JavaScript (Node.js 18+ for Docusaurus), Python 3.8+ for code examples + Docusaurus v3, React, Node.js, npm/yarn
