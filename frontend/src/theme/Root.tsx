@@ -8,22 +8,22 @@
 
 import React, { ReactNode } from 'react';
 import { ChatWidget } from '../components/ChatWidget';
+import { useSession } from '@site/src/lib/auth';
 
 interface RootProps {
   children: ReactNode;
 }
 
 export default function Root({ children }: RootProps): JSX.Element {
-  // TODO: Replace with actual Better Auth session check
-  // For now, pass isAuthenticated=false to show login prompt
-  // When Better Auth is configured, use:
-  // const { data: session } = useSession();
-  // <ChatWidget isAuthenticated={!!session} session={session} />
+  const { data: session, isPending } = useSession();
 
   return (
     <>
       {children}
-      <ChatWidget isAuthenticated={false} />
+      <ChatWidget
+        isAuthenticated={!!session && !isPending}
+        session={session}
+      />
     </>
   );
 }

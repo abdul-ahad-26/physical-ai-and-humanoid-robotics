@@ -66,58 +66,6 @@ export interface UserSession {
   expires: string;
 }
 
-/**
- * ChatKit theme configuration.
- */
-export interface ChatKitTheme {
-  colorScheme: 'light' | 'dark';
-  radius?: 'round' | 'square';
-  color?: {
-    accent?: {
-      primary?: string;
-      level?: number;
-    };
-  };
-}
-
-/**
- * ChatKit API configuration.
- */
-export interface ChatKitApi {
-  url: string;
-  domainKey: string;
-}
-
-/**
- * ChatKit options for useChatKit hook.
- */
-export interface ChatKitOptions {
-  api: ChatKitApi;
-  theme?: ChatKitTheme;
-  startScreen?: {
-    greeting?: string;
-    prompts?: Array<{
-      label: string;
-      prompt: string;
-      icon?: string;
-    }>;
-  };
-  composer?: {
-    placeholder?: string;
-  };
-  history?: {
-    enabled?: boolean;
-    showDelete?: boolean;
-    showRename?: boolean;
-  };
-  header?: {
-    enabled?: boolean;
-    rightAction?: {
-      icon: string;
-      onClick: () => void;
-    };
-  };
-}
 
 /**
  * Error response from API.

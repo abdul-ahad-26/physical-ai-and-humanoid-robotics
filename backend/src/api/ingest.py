@@ -88,6 +88,8 @@ async def ingest_content(
     2. Generates embeddings for each chunk
     3. Stores chunks and embeddings in Qdrant
 
+    Requires admin authentication. In development, all authenticated users are treated as admins.
+
     Args:
         request: The ingestion request with content and metadata.
         user: The authenticated admin user.
@@ -96,7 +98,8 @@ async def ingest_content(
         IngestResponse with chunk count and vector IDs.
 
     Raises:
-        HTTPException: 403 if user is not an admin.
+        HTTPException: 401 if not authenticated.
+        HTTPException: 403 if not an admin.
         HTTPException: 500 if ingestion fails.
     """
     try:

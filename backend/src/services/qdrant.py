@@ -148,10 +148,10 @@ async def search_similar_chunks(
             ]
         )
 
-    # Perform search
-    results = await client.search(
+    # Perform search using query_points (new API in qdrant-client >= 1.9.0)
+    response = await client.query_points(
         collection_name=settings.qdrant_collection,
-        query_vector=query_vector,
+        query=query_vector,
         limit=top_k,
         score_threshold=score_threshold,
         query_filter=search_filter,
@@ -159,8 +159,9 @@ async def search_similar_chunks(
     )
 
     # Convert to SearchResult objects
+    # Note: query_points returns QueryResponse with .points attribute
     search_results = []
-    for point in results:
+    for point in response.points:
         payload = point.payload or {}
         search_results.append(
             SearchResult(

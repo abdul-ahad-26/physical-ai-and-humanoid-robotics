@@ -37,7 +37,7 @@ class Settings(BaseModel):
     ]
 
     # RAG Settings
-    similarity_threshold: float = 0.7
+    similarity_threshold: float = 0.5  # Lowered from 0.7 to capture more relevant results
     top_k_results: int = 5
     chunk_size: int = 512
     chunk_overlap: int = 50
