@@ -1,0 +1,144 @@
+/**
+ * Shared styles for login and signup pages
+ * Theme: Green (#10B981) accent matching chatbot UI
+ */
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 200px);
+  padding: 2rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8f5e9 100%);
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 2.5rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  max-width: 440px;
+  width: 100%;
+  border-top: 4px solid #10b981;
+}
+
+.card h1 {
+  margin: 0 0 0.5rem 0;
+  color: #1a1a1a;
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.subtitle {
+  margin: 0 0 2rem 0;
+  color: #666;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.field {
+  margin-bottom: 1.5rem;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.field input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.field input:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+}
+
+.field input::placeholder {
+  color: #999;
+}
+
+.button {
+  width: 100%;
+  padding: 1rem;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  margin-top: 0.5rem;
+}
+
+.button:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error {
+  margin-bottom: 1rem;
+  padding: 0.875rem 1rem;
+  background: #fee;
+  border: 1px solid #fcc;
+  border-left: 4px solid #c33;
+  border-radius: 8px;
+  color: #c33;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.link {
+  margin-top: 1.75rem;
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.link a {
+  color: #10b981;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.link a:hover {
+  color: #059669;
+  text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .card {
+    padding: 2rem 1.5rem;
+  }
+
+  .card h1 {
+    font-size: 1.75rem;
+  }
+}

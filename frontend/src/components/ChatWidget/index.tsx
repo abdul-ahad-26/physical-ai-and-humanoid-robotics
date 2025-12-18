@@ -9,96 +9,15 @@
  * - Selected text context support
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-
-// Note: These imports require installing the packages
-// npm install @openai/chatkit-react
-// For Better Auth: npm install better-auth (or use session context)
-
-// Type definitions for when packages are not yet installed
-interface ChatKitControl {
-  // Control object from useChatKit
-}
-
-interface ChatKitOptions {
-  api: {
-    url: string;
-    domainKey: string;
-  };
-  theme?: {
-    colorScheme?: 'light' | 'dark';
-    radius?: 'round' | 'square';
-    color?: {
-      accent?: {
-        primary?: string;
-        level?: number;
-      };
-    };
-  };
-  startScreen?: {
-    greeting?: string;
-    prompts?: Array<{
-      label: string;
-      prompt: string;
-      icon?: string;
-    }>;
-  };
-  composer?: {
-    placeholder?: string;
-  };
-}
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // Environment configuration
 // Note: In Docusaurus, use docusaurus.config.js customFields for env vars
 const API_URL = typeof window !== 'undefined'
   ? (window as any).__API_URL__ || 'http://localhost:8000'
   : 'http://localhost:8000';
-const DOMAIN_KEY = 'textbook-rag';
-
-// ChatKit configuration options
-const chatKitOptions: ChatKitOptions = {
-  api: {
-    url: `${API_URL}/api/chatkit`,
-    domainKey: DOMAIN_KEY,
-  },
-  theme: {
-    colorScheme: 'light',
-    radius: 'round',
-    color: {
-      accent: {
-        primary: '#10B981', // Green accent color per spec
-        level: 2,
-      },
-    },
-  },
-  startScreen: {
-    greeting: 'Ask me about this textbook!',
-    prompts: [
-      {
-        label: 'Explain a concept',
-        prompt: 'Can you explain ',
-        icon: 'lightbulb',
-      },
-      {
-        label: 'Find information',
-        prompt: 'Where can I learn about ',
-        icon: 'search',
-      },
-      {
-        label: 'Summarize section',
-        prompt: 'Summarize the section on ',
-        icon: 'document',
-      },
-    ],
-  },
-  composer: {
-    placeholder: 'Ask a question about the book...',
-  },
-};
-
-// Placeholder for actual ChatKit implementation
-// Replace with actual import when package is installed:
-// import { ChatKit, useChatKit } from '@openai/chatkit-react';
 
 interface ChatWidgetProps {
   /** Whether the user is authenticated */
@@ -129,6 +48,72 @@ export function ChatWidget({
 
   // Check if user is logged in
   const isLoggedIn = isAuthenticated || !!session;
+
+  // Simple chat UI state (fallback when ChatKit not available)
+  const [messages, setMessages] = useState<Array<{role: 'user' | 'assistant', content: string, citations?: any[]}>>([]);
+  const [inputValue, setInputValue] = useState('');
+  const [isLoadingMessage, setIsLoadingMessage] = useState(false);
+  const [sessionIdState, setSessionIdState] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Send message function
+  const sendMessage = async () => {
+    if (!inputValue.trim() || isLoadingMessage) return;
+
+    const userMessage = inputValue.trim();
+    setInputValue('');
+    setIsLoadingMessage(true);
+
+    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+
+    try {
+      const response = await fetch(`${apiUrl || API_URL}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          message: userMessage,
+          session_id: sessionIdState,
+          selected_text: selectedText || undefined,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to get response');
+
+      const data = await response.json();
+      if (!sessionIdState && data.session_id) {
+        setSessionIdState(data.session_id);
+      }
+
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: data.answer,
+        citations: data.citations
+      }]);
+
+      if (selectedText) setSelectedText('');
+    } catch (error) {
+      console.error('Chat error:', error);
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: 'Sorry, I encountered an error. Please try again.'
+      }]);
+    } finally {
+      setIsLoadingMessage(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
 
   // Handle text selection on the page
   const handleTextSelection = useCallback(() => {
@@ -428,89 +413,152 @@ export function ChatWidget({
             </div>
           )}
 
-          {/* Chat Content Area - Placeholder */}
+          {/* Chat Messages Area */}
           <div
             style={{
               flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              padding: '2rem',
-              color: '#6b7280',
-              textAlign: 'center',
+              overflowY: 'auto',
+              padding: '1rem',
+              backgroundColor: '#f9fafb',
             }}
           >
-            <svg
-              width="48"
-              height="48"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#10B981"
-              strokeWidth="1.5"
-              style={{ marginBottom: '1rem' }}
-            >
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
-            <p style={{ marginBottom: '0.5rem', fontWeight: 500 }}>
-              Ask me about this textbook!
-            </p>
-            <p style={{ fontSize: '0.875rem' }}>
-              I can help you understand concepts, find information, and answer
-              questions about the content.
-            </p>
-            <p
-              style={{
-                fontSize: '0.75rem',
-                marginTop: '1rem',
-                color: '#9ca3af',
-              }}
-            >
-              ChatKit integration pending - install @openai/chatkit-react
-            </p>
+            {messages.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
+                <p style={{ marginBottom: '1rem', fontWeight: 500 }}>Ask me about the textbook!</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {['💡 Can you explain ', '🔍 Where can I learn about ', '📄 Summarize the section on '].map((prompt, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setInputValue(prompt)}
+                      style={{
+                        padding: '0.5rem 1rem',
+                        backgroundColor: 'white',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        fontSize: '0.875rem',
+                        textAlign: 'left',
+                      }}
+                    >
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <>
+                {messages.map((msg, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      marginBottom: '1rem',
+                      display: 'flex',
+                      justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                    }}
+                  >
+                    <div
+                      style={{
+                        maxWidth: '80%',
+                        padding: '0.75rem 1rem',
+                        borderRadius: '12px',
+                        backgroundColor: msg.role === 'user' ? '#10B981' : 'white',
+                        color: msg.role === 'user' ? 'white' : '#1f2937',
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+                      }}
+                    >
+                      <div style={{ fontSize: '0.875rem', lineHeight: '1.5' }}>
+                        {msg.role === 'assistant' ? (
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {msg.content}
+                          </ReactMarkdown>
+                        ) : (
+                          <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                            {msg.content}
+                          </div>
+                        )}
+                      </div>
+                      {msg.citations && msg.citations.length > 0 && (
+                        <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#6b7280', borderTop: '1px solid #e5e7eb', paddingTop: '0.5rem' }}>
+                          <strong>Sources:</strong>{' '}
+                          {msg.citations.map((cit: any, cidx: number) => (
+                            <a
+                              key={cidx}
+                              href={cit.anchor_url}
+                              style={{
+                                color: '#10B981',
+                                marginRight: '0.5rem',
+                                textDecoration: 'underline',
+                                cursor: 'pointer'
+                              }}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                window.location.href = cit.anchor_url;
+                              }}
+                            >
+                              {cit.display_text}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {isLoadingMessage && (
+                  <div style={{ textAlign: 'center', color: '#6b7280', fontSize: '0.875rem', fontStyle: 'italic' }}>
+                    Thinking...
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </>
+            )}
           </div>
 
-          {/* Input Area - Placeholder */}
+          {/* Input Area */}
           <div
             style={{
               padding: '1rem',
               borderTop: '1px solid #e5e7eb',
+              backgroundColor: 'white',
             }}
           >
-            <div
-              style={{
-                display: 'flex',
-                gap: '0.5rem',
-              }}
-            >
-              <input
-                type="text"
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end' }}>
+              <textarea
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={handleKeyPress}
                 placeholder="Ask a question about the book..."
+                disabled={isLoadingMessage}
+                rows={2}
                 style={{
                   flex: 1,
-                  padding: '0.75rem 1rem',
-                  border: '1px solid #d1d5db',
+                  padding: '0.75rem',
+                  border: '1px solid #e5e7eb',
                   borderRadius: '8px',
+                  resize: 'none',
+                  fontSize: '0.875rem',
+                  fontFamily: 'inherit',
                   outline: 'none',
                 }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#10B981';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#d1d5db';
-                }}
+                onFocus={(e) => e.target.style.borderColor = '#10B981'}
+                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
               />
               <button
+                onClick={sendMessage}
+                disabled={!inputValue.trim() || isLoadingMessage}
                 style={{
-                  padding: '0.75rem 1rem',
-                  backgroundColor: '#10B981',
+                  padding: '0.75rem 1.5rem',
+                  backgroundColor: inputValue.trim() && !isLoadingMessage ? '#10B981' : '#d1d5db',
                   color: 'white',
                   border: 'none',
                   borderRadius: '8px',
-                  cursor: 'pointer',
+                  cursor: inputValue.trim() && !isLoadingMessage ? 'pointer' : 'not-allowed',
+                  fontWeight: 500,
+                  fontSize: '0.875rem',
+                  whiteSpace: 'nowrap',
+                  transition: 'background-color 0.2s',
                 }}
               >
-                Send
+                {isLoadingMessage ? 'Sending...' : 'Send'}
               </button>
             </div>
           </div>

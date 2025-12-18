@@ -1,22 +1,28 @@
 services:
   - type: web
-    name: rag-chatbot-api
-    env: docker
-    plan: free
+    name: physical-ai-backend
+    runtime: python
+    region: oregon # Change to your preferred region
+    plan: free # Upgrade to 'starter' for production (free tier spins down after inactivity)
     branch: main
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn src.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
       - key: DATABASE_URL
-        sync: false
+        sync: false # Set in Render dashboard: postgresql://user:pass@host/db
       - key: QDRANT_URL
-        sync: false
+        sync: false # Set in Render dashboard: https://your-cluster.qdrant.io
       - key: QDRANT_API_KEY
-        sync: false
+        sync: false # Set in Render dashboard
       - key: OPENAI_API_KEY
-        sync: false
+        sync: false # Set in Render dashboard: sk-...
+      - key: AUTH_SECRET
+        sync: false # Set in Render dashboard: generate with: python -c "import secrets; print(secrets.token_urlsafe(32))"
       - key: BETTER_AUTH_URL
-        sync: false
+        value: https://your-frontend-url.vercel.app # Update with actual frontend URL after deployment
       - key: CORS_ORIGINS
-        sync: false
+        value: https://your-frontend-url.vercel.app,http://localhost:3000 # Update with actual frontend URL

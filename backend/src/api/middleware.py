@@ -3,11 +3,11 @@
 from typing import Optional
 from uuid import UUID
 
-import httpx
 from fastapi import Depends, HTTPException, Request
 from pydantic import BaseModel
 
 from src.config import get_settings
+from src.db.connection import get_db_pool
 
 
 class BetterAuthSession(BaseModel):
@@ -29,8 +29,8 @@ class AuthenticatedUser(BaseModel):
 async def validate_session(request: Request) -> AuthenticatedUser:
     """Validate Better Auth session from request cookies.
 
-    This middleware calls Better Auth's session endpoint to validate
-    the session cookie and retrieve user information.
+    This middleware validates the session cookie by querying the database
+    directly instead of calling an external Better Auth service.
 
     Args:
         request: The FastAPI request object.
@@ -41,10 +41,8 @@ async def validate_session(request: Request) -> AuthenticatedUser:
     Raises:
         HTTPException: 401 if session is invalid or missing.
     """
-    settings = get_settings()
-
     # Get session cookie
-    session_cookie = request.cookies.get("better-auth.session_token")
+    session_cookie = request.cookies.get("session")
 
     if not session_cookie:
         raise HTTPException(
@@ -54,50 +52,43 @@ async def validate_session(request: Request) -> AuthenticatedUser:
         )
 
     try:
-        # Call Better Auth API to validate session
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f"{settings.better_auth_url}/api/auth/get-session",
-                cookies={"better-auth.session_token": session_cookie},
-                timeout=10.0,
+        pool = await get_db_pool()
+
+        async with pool.acquire() as conn:
+            # Query session with user join
+            session = await conn.fetchrow(
+                """
+                SELECT s.expires_at, u.id, u.email, u.display_name
+                FROM auth_sessions s
+                JOIN users u ON s.user_id = u.id
+                WHERE s.session_token = $1 AND s.expires_at > NOW()
+                """,
+                session_cookie,
             )
 
-            if response.status_code != 200:
+            if not session:
                 raise HTTPException(
                     status_code=401,
                     detail="Invalid or expired session",
                 )
 
-            session_data = response.json()
-
-            # Extract user info from session
-            user = session_data.get("user", {})
-            if not user:
-                raise HTTPException(
-                    status_code=401,
-                    detail="Invalid session data",
-                )
-
             return AuthenticatedUser(
-                id=UUID(user.get("id")),
-                email=user.get("email"),
-                display_name=user.get("name"),
+                id=UUID(str(session["id"])),
+                email=session["email"],
+                display_name=session["display_name"],
             )
 
-    except httpx.TimeoutException:
-        raise HTTPException(
-            status_code=503,
-            detail="Authentication service unavailable",
-        )
-    except httpx.RequestError as e:
-        raise HTTPException(
-            status_code=503,
-            detail=f"Authentication service error: {str(e)}",
-        )
+    except HTTPException:
+        raise
     except ValueError as e:
         raise HTTPException(
             status_code=401,
             detail=f"Invalid session data: {str(e)}",
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Authentication error: {str(e)}",
         )
 
 

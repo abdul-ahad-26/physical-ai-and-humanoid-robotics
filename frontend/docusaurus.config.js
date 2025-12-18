@@ -43,6 +43,11 @@ const config = {
     locales: ['en'],
   },
 
+  // Custom fields to expose environment variables to client-side
+  customFields: {
+    apiUrl: process.env.API_URL || 'http://localhost:8000',
+  },
+
   presets: [
     [
       'classic',
@@ -84,6 +89,10 @@ const config = {
           {
             href: 'https://github.com/abdul-ahad-26/physical-ai-and-humanoid-robotics',
             label: 'GitHub',
+            position: 'right',
+          },
+          {
+            type: 'custom-authButton',
             position: 'right',
           },
         ],

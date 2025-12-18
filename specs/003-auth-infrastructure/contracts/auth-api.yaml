@@ -1,0 +1,467 @@
+openapi: 3.0.3
+info:
+  title: Better Auth Authentication API
+  version: 1.0.0
+  description: |
+    Authentication API for the RAG Chatbot system using Better Auth.
+    Provides endpoints for user signup, login, logout, and session validation.
+
+    **Status**: ✅ IMPLEMENTED (2025-12-18)
+    **Authentication**: Session-based using HTTP-only cookies.
+    **Session Duration**: 7 days from login/signup.
+    **Password Requirements**: Minimum 8 characters.
+
+    **Note**: This contract was implemented as specified with additional Better Auth-compatible
+    endpoints (/api/auth/sign-in/email, /api/auth/sign-out, /api/auth/get-session).
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+  - url: https://api.example.com
+    description: Production server
+
+tags:
+  - name: Authentication
+    description: User authentication operations
+
+paths:
+  /api/auth/signup:
+    post:
+      tags:
+        - Authentication
+      summary: Create a new user account
+      description: |
+        Registers a new user with email and password. On success, creates a session
+        and returns a session cookie. The user is automatically logged in.
+      operationId: signup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+            examples:
+              valid:
+                summary: Valid signup request
+                value:
+                  email: user@example.com
+                  password: securepassword123
+      responses:
+        '201':
+          description: Account created successfully
+          headers:
+            Set-Cookie:
+              description: Session cookie (HTTP-only, Secure, SameSite=Lax)
+              schema:
+                type: string
+                example: session=abc123xyz; HttpOnly; Secure; SameSite=Lax; Max-Age=604800
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSuccessResponse'
+              examples:
+                success:
+                  summary: Successful signup
+                  value:
+                    user:
+                      id: 550e8400-e29b-41d4-a716-446655440000
+                      email: user@example.com
+                      display_name: null
+                      created_at: '2025-12-17T10:00:00Z'
+                    session:
+                      token: abc123xyz789
+                      expires_at: '2025-12-24T10:00:00Z'
+        '400':
+          description: Invalid request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidEmail:
+                  summary: Invalid email format
+                  value:
+                    error:
+                      code: AUTH_004
+                      message: Invalid email format
+                      field: email
+                passwordTooShort:
+                  summary: Password too short
+                  value:
+                    error:
+                      code: AUTH_005
+                      message: Password must be at least 8 characters
+                      field: password
+        '409':
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                emailExists:
+                  summary: Email already in use
+                  value:
+                    error:
+                      code: AUTH_002
+                      message: Email already registered
+                      field: email
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                databaseError:
+                  summary: Database connection failed
+                  value:
+                    error:
+                      code: DB_001
+                      message: Database connection error
+                      field: null
+
+  /api/auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Authenticate existing user
+      description: |
+        Logs in an existing user with email and password. On success, creates a session
+        and returns a session cookie. Updates the user's last_login timestamp.
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              valid:
+                summary: Valid login request
+                value:
+                  email: user@example.com
+                  password: securepassword123
+      responses:
+        '200':
+          description: Login successful
+          headers:
+            Set-Cookie:
+              description: Session cookie (HTTP-only, Secure, SameSite=Lax)
+              schema:
+                type: string
+                example: session=abc123xyz; HttpOnly; Secure; SameSite=Lax; Max-Age=604800
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSuccessResponse'
+              examples:
+                success:
+                  summary: Successful login
+                  value:
+                    user:
+                      id: 550e8400-e29b-41d4-a716-446655440000
+                      email: user@example.com
+                      display_name: null
+                      last_login: '2025-12-17T10:00:00Z'
+                    session:
+                      token: abc123xyz789
+                      expires_at: '2025-12-24T10:00:00Z'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidCredentials:
+                  summary: Wrong email or password
+                  value:
+                    error:
+                      code: AUTH_001
+                      message: Invalid email or password
+                      field: null
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Terminate current session
+      description: |
+        Logs out the current user by invalidating their session. Requires a valid
+        session cookie. Clears the session cookie.
+      operationId: logout
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Logout successful
+          headers:
+            Set-Cookie:
+              description: Clears session cookie
+              schema:
+                type: string
+                example: session=; HttpOnly; Secure; SameSite=Lax; Max-Age=0
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutResponse'
+              examples:
+                success:
+                  summary: Successful logout
+                  value:
+                    message: Logged out successfully
+        '401':
+          description: No active session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                noSession:
+                  summary: Not authenticated
+                  value:
+                    error:
+                      code: AUTH_003
+                      message: No active session
+                      field: null
+
+  /api/auth/session:
+    get:
+      tags:
+        - Authentication
+      summary: Validate current session
+      description: |
+        Checks if the current session is valid and returns user information.
+        Used by frontend to determine authentication status.
+      operationId: getSession
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Valid session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+              examples:
+                success:
+                  summary: Valid session
+                  value:
+                    user:
+                      id: 550e8400-e29b-41d4-a716-446655440000
+                      email: user@example.com
+                      display_name: null
+                    session:
+                      expires_at: '2025-12-24T10:00:00Z'
+        '401':
+          description: Invalid or expired session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                expired:
+                  summary: Session expired
+                  value:
+                    error:
+                      code: AUTH_003
+                      message: Session expired or invalid
+                      field: null
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: session
+      description: Session cookie set by /api/auth/signup or /api/auth/login
+
+  schemas:
+    SignupRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: user@example.com
+          minLength: 5
+          maxLength: 255
+        password:
+          type: string
+          format: password
+          description: User password (minimum 8 characters)
+          example: securepassword123
+          minLength: 8
+          maxLength: 128
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          description: User password
+          example: securepassword123
+
+    AuthSuccessResponse:
+      type: object
+      required:
+        - user
+        - session
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        session:
+          $ref: '#/components/schemas/Session'
+
+    SessionResponse:
+      type: object
+      required:
+        - user
+        - session
+      properties:
+        user:
+          $ref: '#/components/schemas/UserInfo'
+        session:
+          type: object
+          required:
+            - expires_at
+          properties:
+            expires_at:
+              type: string
+              format: date-time
+              description: Session expiration timestamp
+              example: '2025-12-24T10:00:00Z'
+
+    LogoutResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: Logged out successfully
+
+    User:
+      type: object
+      required:
+        - id
+        - email
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique user identifier
+          example: 550e8400-e29b-41d4-a716-446655440000
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: user@example.com
+        display_name:
+          type: string
+          nullable: true
+          description: Optional display name
+          example: John Doe
+        created_at:
+          type: string
+          format: date-time
+          description: Account creation timestamp
+          example: '2025-12-17T10:00:00Z'
+        last_login:
+          type: string
+          format: date-time
+          nullable: true
+          description: Last login timestamp (for login response)
+          example: '2025-12-17T10:00:00Z'
+
+    UserInfo:
+      type: object
+      required:
+        - id
+        - email
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique user identifier
+          example: 550e8400-e29b-41d4-a716-446655440000
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: user@example.com
+        display_name:
+          type: string
+          nullable: true
+          description: Optional display name
+          example: John Doe
+
+    Session:
+      type: object
+      required:
+        - token
+        - expires_at
+      properties:
+        token:
+          type: string
+          description: Session token (included in response, stored in HTTP-only cookie)
+          example: abc123xyz789
+        expires_at:
+          type: string
+          format: date-time
+          description: Session expiration timestamp
+          example: '2025-12-24T10:00:00Z'
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              description: Error code for programmatic handling
+              example: AUTH_001
+              enum:
+                - AUTH_001  # Invalid credentials
+                - AUTH_002  # Email already registered
+                - AUTH_003  # Session expired
+                - AUTH_004  # Invalid email format
+                - AUTH_005  # Password too short
+                - DB_001    # Database connection error
+                - DB_002    # Query failed
+            message:
+              type: string
+              description: Human-readable error message
+              example: Invalid email or password
+            field:
+              type: string
+              nullable: true
+              description: Field that caused the error (if applicable)
+              example: email

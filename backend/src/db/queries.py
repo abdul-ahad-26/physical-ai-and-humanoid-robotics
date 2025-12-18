@@ -226,8 +226,15 @@ async def create_message(data: MessageCreate) -> Message:
             citations_json,
         )
         result = dict(row)
-        # Parse citations back from JSON
-        result["citations"] = [Citation(**c) for c in result["citations"]]
+        # Parse citations back from JSON (asyncpg returns JSONB as Python objects)
+        if result["citations"]:
+            # Ensure citations is a list, handle both string and list cases
+            citations_data = result["citations"]
+            if isinstance(citations_data, str):
+                citations_data = json.loads(citations_data)
+            result["citations"] = [Citation(**c) for c in citations_data] if citations_data else []
+        else:
+            result["citations"] = []
         return Message(**result)
 
 
@@ -253,7 +260,14 @@ async def get_session_messages(
         messages = []
         for row in rows:
             result = dict(row)
-            result["citations"] = [Citation(**c) for c in result["citations"]]
+            # Parse citations (asyncpg returns JSONB as Python objects)
+            if result["citations"]:
+                citations_data = result["citations"]
+                if isinstance(citations_data, str):
+                    citations_data = json.loads(citations_data)
+                result["citations"] = [Citation(**c) for c in citations_data] if citations_data else []
+            else:
+                result["citations"] = []
             messages.append(Message(**result))
         return messages
 
