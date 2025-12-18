@@ -6,10 +6,10 @@
  */
 
 import { createAuthClient } from "better-auth/react";
+import { getApiUrl } from "./config";
 
 // Get API URL from Docusaurus customFields (injected at build time)
-// @ts-ignore - customFields is injected by Docusaurus
-const apiUrl = (typeof window !== 'undefined' && window.docusaurus?.siteConfig?.customFields?.apiUrl) || "http://localhost:8000";
+const apiUrl = getApiUrl();
 
 export const authClient = createAuthClient({
   baseURL: apiUrl,
