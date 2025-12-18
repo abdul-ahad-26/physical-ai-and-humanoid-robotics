@@ -12,12 +12,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-
-// Environment configuration
-// Note: In Docusaurus, use docusaurus.config.js customFields for env vars
-const API_URL = typeof window !== 'undefined'
-  ? (window as any).__API_URL__ || 'http://localhost:8000'
-  : 'http://localhost:8000';
+import { getApiUrl } from '@site/src/lib/config';
 
 interface ChatWidgetProps {
   /** Whether the user is authenticated */
@@ -46,6 +41,9 @@ export function ChatWidget({
   const [isOpen, setIsOpen] = useState(false);
   const [selectedText, setSelectedText] = useState<string>('');
 
+  // Get API URL from Docusaurus config (respects API_URL env var at build time)
+  const effectiveApiUrl = apiUrl || getApiUrl();
+
   // Check if user is logged in
   const isLoggedIn = isAuthenticated || !!session;
 
@@ -72,7 +70,7 @@ export function ChatWidget({
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
 
     try {
-      const response = await fetch(`${apiUrl || API_URL}/api/chat`, {
+      const response = await fetch(`${effectiveApiUrl}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

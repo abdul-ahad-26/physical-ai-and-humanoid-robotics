@@ -6,6 +6,7 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { getApiUrl } from '@site/src/lib/config';
 
 // Type definitions for Better Auth session
 interface User {
@@ -54,8 +55,10 @@ interface SessionProviderProps {
  */
 export function SessionProvider({
   children,
-  authUrl = 'http://localhost:3000',
+  authUrl,
 }: SessionProviderProps) {
+  // Get API URL from Docusaurus config if not provided
+  const effectiveAuthUrl = authUrl || getApiUrl();
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -63,7 +66,7 @@ export function SessionProvider({
     // Fetch session from Better Auth API
     const fetchSession = async () => {
       try {
-        const response = await fetch(`${authUrl}/api/auth/get-session`, {
+        const response = await fetch(`${effectiveAuthUrl}/api/auth/get-session`, {
           credentials: 'include',
         });
 
@@ -81,7 +84,7 @@ export function SessionProvider({
     };
 
     fetchSession();
-  }, [authUrl]);
+  }, [effectiveAuthUrl]);
 
   const value: SessionContextType = {
     session,
