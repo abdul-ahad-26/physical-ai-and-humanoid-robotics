@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from "react";
-import { signIn } from "@site/src/lib/auth";
+import { useSignIn } from "@site/src/lib/auth";
 import styles from "./login.module.css";
 
 export default function LoginPage(): JSX.Element {
@@ -14,6 +14,7 @@ export default function LoginPage(): JSX.Element {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const signIn = useSignIn();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

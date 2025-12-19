@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from "react";
-import { signUp } from "@site/src/lib/auth";
+import { useSignUp } from "@site/src/lib/auth";
 import styles from "./login.module.css";
 
 export default function SignupPage(): JSX.Element {
@@ -14,6 +14,7 @@ export default function SignupPage(): JSX.Element {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const signUp = useSignUp();
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
