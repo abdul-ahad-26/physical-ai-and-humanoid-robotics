@@ -1,10 +1,11 @@
 import React from 'react';
-import { useSession, signOut } from '../../lib/auth';
+import { useSession, useSignOut } from '../../lib/auth';
 import { useHistory } from '@docusaurus/router';
 
 export default function AuthButton() {
   const { data: session, isPending } = useSession();
   const history = useHistory();
+  const signOut = useSignOut();
 
   const handleSignOut = async () => {
     try {
