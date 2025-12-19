@@ -38,6 +38,9 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
+    # Debug: Print CORS origins at startup
+    print(f"[CORS] Configured origins: {settings.cors_origins}")
+
     # Configure CORS
     app.add_middleware(
         CORSMiddleware,
@@ -45,6 +48,7 @@ def create_app() -> FastAPI:
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allow_headers=["*"],
+        expose_headers=["Set-Cookie"],
     )
 
     # Register routers

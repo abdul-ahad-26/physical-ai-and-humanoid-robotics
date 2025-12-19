@@ -185,12 +185,13 @@ async def signup(request: SignupRequest, response: Response):
         )
 
     # Set session cookie
+    # Note: samesite="none" is required for cross-domain cookies (Vercel frontend -> Render backend)
     response.set_cookie(
         key="session",
         value=session_token,
         httponly=True,
         secure=True,
-        samesite="lax",
+        samesite="none",
         max_age=604800,  # 7 days in seconds
     )
 
@@ -272,12 +273,13 @@ async def login(request: LoginRequest, response: Response):
         )
 
     # Set session cookie
+    # Note: samesite="none" is required for cross-domain cookies (Vercel frontend -> Render backend)
     response.set_cookie(
         key="session",
         value=session_token,
         httponly=True,
         secure=True,
-        samesite="lax",
+        samesite="none",
         max_age=604800,
     )
 
