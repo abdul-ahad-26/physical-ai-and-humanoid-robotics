@@ -12,7 +12,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { getApiUrl } from '@site/src/lib/config';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 
 interface ChatWidgetProps {
   /** Whether the user is authenticated */
@@ -42,7 +42,8 @@ export function ChatWidget({
   const [selectedText, setSelectedText] = useState<string>('');
 
   // Get API URL from Docusaurus config (respects API_URL env var at build time)
-  const effectiveApiUrl = apiUrl || getApiUrl();
+  const { siteConfig } = useDocusaurusContext();
+  const effectiveApiUrl = apiUrl || (siteConfig.customFields?.apiUrl as string) || 'http://localhost:8000';
 
   // Check if user is logged in
   const isLoggedIn = isAuthenticated || !!session;
