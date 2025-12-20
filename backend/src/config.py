@@ -30,6 +30,32 @@ class Settings(BaseModel):
     # Better Auth
     better_auth_url: str = os.getenv("BETTER_AUTH_URL", "http://localhost:3000")
 
+    # OAuth Provider Settings
+    google_client_id: str = os.getenv("GOOGLE_CLIENT_ID", "")
+    google_client_secret: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
+    github_client_id: str = os.getenv("GITHUB_CLIENT_ID", "")
+    github_client_secret: str = os.getenv("GITHUB_CLIENT_SECRET", "")
+
+    # API URL for OAuth callbacks
+    api_url: str = os.getenv("API_URL", "http://localhost:8000")
+    frontend_url: str = os.getenv("FRONTEND_URL", "http://localhost:3000")
+
+    # Cookie security - disable secure cookies for localhost development
+    @property
+    def is_development(self) -> bool:
+        """Check if running in development mode (localhost)."""
+        return "localhost" in self.api_url or "127.0.0.1" in self.api_url
+
+    @property
+    def cookie_secure(self) -> bool:
+        """Cookie secure flag - False for localhost, True for production."""
+        return not self.is_development
+
+    @property
+    def cookie_samesite(self) -> str:
+        """Cookie SameSite policy - Lax for localhost, None for cross-domain production."""
+        return "lax" if self.is_development else "none"
+
     # CORS
     cors_origins: List[str] = [
         origin.strip()

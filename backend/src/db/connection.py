@@ -60,8 +60,11 @@ async def init_db_schema() -> None:
         email VARCHAR(255) UNIQUE NOT NULL,
         password_hash VARCHAR(255),
         display_name VARCHAR(100),
+        auth_provider VARCHAR(20) DEFAULT 'email' NOT NULL,
+        oauth_provider_id VARCHAR(255),
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        last_login TIMESTAMP WITH TIME ZONE
+        last_login TIMESTAMP WITH TIME ZONE,
+        CONSTRAINT valid_auth_provider CHECK (auth_provider IN ('email', 'google', 'github'))
     );
 
     -- Auth sessions table (Better Auth session management)
@@ -118,6 +121,7 @@ async def init_db_schema() -> None:
     -- Indexes
     CREATE INDEX IF NOT EXISTS idx_auth_sessions_token ON auth_sessions(session_token);
     CREATE INDEX IF NOT EXISTS idx_auth_sessions_user_id ON auth_sessions(user_id);
+    CREATE INDEX IF NOT EXISTS idx_users_oauth ON users(auth_provider, oauth_provider_id);
     CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
     CREATE INDEX IF NOT EXISTS idx_sessions_last_activity ON sessions(last_activity);
     CREATE INDEX IF NOT EXISTS idx_messages_session_id ON messages(session_id);

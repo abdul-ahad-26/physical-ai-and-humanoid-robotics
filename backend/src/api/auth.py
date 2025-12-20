@@ -20,6 +20,7 @@ from fastapi import APIRouter, Cookie, HTTPException, Response
 from pydantic import BaseModel, EmailStr, Field
 
 from src.db.connection import get_db_pool
+from src.config import get_settings
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 ph = PasswordHasher()
@@ -50,6 +51,7 @@ class UserResponse(BaseModel):
     id: str
     email: str
     display_name: Optional[str]
+    auth_provider: Optional[str] = "email"
     created_at: Optional[str] = None
     last_login: Optional[str] = None
 
@@ -184,14 +186,14 @@ async def signup(request: SignupRequest, response: Response):
             expires_at,
         )
 
-    # Set session cookie
-    # Note: samesite="none" is required for cross-domain cookies (Vercel frontend -> Render backend)
+    # Set session cookie with environment-aware security settings
+    settings = get_settings()
     response.set_cookie(
         key="session",
         value=session_token,
         httponly=True,
-        secure=True,
-        samesite="none",
+        secure=settings.cookie_secure,
+        samesite=settings.cookie_samesite,
         max_age=604800,  # 7 days in seconds
     )
 
@@ -272,14 +274,14 @@ async def login(request: LoginRequest, response: Response):
             "UPDATE users SET last_login = NOW() WHERE id = $1", user["id"]
         )
 
-    # Set session cookie
-    # Note: samesite="none" is required for cross-domain cookies (Vercel frontend -> Render backend)
+    # Set session cookie with environment-aware security settings
+    settings = get_settings()
     response.set_cookie(
         key="session",
         value=session_token,
         httponly=True,
-        secure=True,
-        samesite="none",
+        secure=settings.cookie_secure,
+        samesite=settings.cookie_samesite,
         max_age=604800,
     )
 
@@ -357,7 +359,7 @@ async def get_session(session_token: Optional[str] = Cookie(None, alias="session
         # Query session with user join
         session = await conn.fetchrow(
             """
-            SELECT s.expires_at, u.id, u.email, u.display_name
+            SELECT s.expires_at, u.id, u.email, u.display_name, u.auth_provider
             FROM auth_sessions s
             JOIN users u ON s.user_id = u.id
             WHERE s.session_token = $1 AND s.expires_at > NOW()
@@ -382,6 +384,7 @@ async def get_session(session_token: Optional[str] = Cookie(None, alias="session
             id=str(session["id"]),
             email=session["email"],
             display_name=session["display_name"],
+            auth_provider=session["auth_provider"],
         ),
         session={"expires_at": session["expires_at"].isoformat()},
     )
@@ -424,3 +427,146 @@ async def better_auth_logout(
     Alias for /logout - matches Better Auth client expectations.
     """
     return await logout(response, session_token)
+
+
+# ============================================================================
+# Profile Management Endpoints
+# ============================================================================
+
+
+class UpdateProfileRequest(BaseModel):
+    """Profile update request."""
+
+    display_name: Optional[str] = Field(None, min_length=1, max_length=100)
+
+
+class ProfileResponse(BaseModel):
+    """Profile update response."""
+
+    user: UserResponse
+    message: str
+
+
+@router.patch("/profile", response_model=ProfileResponse)
+async def update_profile(
+    request: UpdateProfileRequest,
+    session_token: Optional[str] = Cookie(None, alias="session"),
+):
+    """
+    Update current user's profile.
+
+    Allows users to update their display name.
+    """
+    if not session_token:
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "error": {
+                    "code": "AUTH_003",
+                    "message": "No active session",
+                    "field": None,
+                }
+            },
+        )
+
+    pool = await get_db_pool()
+
+    async with pool.acquire() as conn:
+        # Verify session and get user
+        session = await conn.fetchrow(
+            """
+            SELECT s.expires_at, u.id, u.email, u.display_name, u.auth_provider
+            FROM auth_sessions s
+            JOIN users u ON s.user_id = u.id
+            WHERE s.session_token = $1 AND s.expires_at > NOW()
+            """,
+            session_token,
+        )
+
+        if not session:
+            raise HTTPException(
+                status_code=401,
+                detail={
+                    "error": {
+                        "code": "AUTH_003",
+                        "message": "Session expired or invalid",
+                        "field": None,
+                    }
+                },
+            )
+
+        # Update display_name if provided
+        if request.display_name is not None:
+            await conn.execute(
+                "UPDATE users SET display_name = $1 WHERE id = $2",
+                request.display_name.strip(),
+                session["id"],
+            )
+            new_display_name = request.display_name.strip()
+        else:
+            new_display_name = session["display_name"]
+
+    return ProfileResponse(
+        user=UserResponse(
+            id=str(session["id"]),
+            email=session["email"],
+            display_name=new_display_name,
+            auth_provider=session["auth_provider"],
+        ),
+        message="Profile updated successfully",
+    )
+
+
+@router.get("/profile", response_model=ProfileResponse)
+async def get_profile(
+    session_token: Optional[str] = Cookie(None, alias="session"),
+):
+    """
+    Get current user's profile.
+    """
+    if not session_token:
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "error": {
+                    "code": "AUTH_003",
+                    "message": "No active session",
+                    "field": None,
+                }
+            },
+        )
+
+    pool = await get_db_pool()
+
+    async with pool.acquire() as conn:
+        session = await conn.fetchrow(
+            """
+            SELECT s.expires_at, u.id, u.email, u.display_name, u.auth_provider
+            FROM auth_sessions s
+            JOIN users u ON s.user_id = u.id
+            WHERE s.session_token = $1 AND s.expires_at > NOW()
+            """,
+            session_token,
+        )
+
+        if not session:
+            raise HTTPException(
+                status_code=401,
+                detail={
+                    "error": {
+                        "code": "AUTH_003",
+                        "message": "Session expired or invalid",
+                        "field": None,
+                    }
+                },
+            )
+
+    return ProfileResponse(
+        user=UserResponse(
+            id=str(session["id"]),
+            email=session["email"],
+            display_name=session["display_name"],
+            auth_provider=session["auth_provider"],
+        ),
+        message="Profile retrieved successfully",
+    )

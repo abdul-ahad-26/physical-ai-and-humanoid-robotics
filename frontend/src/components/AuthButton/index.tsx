@@ -28,17 +28,35 @@ export default function AuthButton() {
   }
 
   if (session) {
+    // Get display name with fallback to email
+    const displayName = session.user?.display_name || session.user?.email || 'User';
+
+    // Truncate long names (>20 chars) with ellipsis
+    const truncatedName = displayName.length > 20
+      ? displayName.substring(0, 17) + '...'
+      : displayName;
+
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <span
+        <a
+          href="/profile"
           style={{
             fontSize: '0.875rem',
             color: 'var(--ifm-navbar-link-color)',
             marginRight: '0.5rem',
+            textDecoration: 'none',
+            cursor: 'pointer',
+          }}
+          title={`${displayName} - Click to edit profile`}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.textDecoration = 'underline';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.textDecoration = 'none';
           }}
         >
-          {session.user?.email}
-        </span>
+          Welcome, {truncatedName}
+        </a>
         <button
           onClick={handleSignOut}
           style={{
