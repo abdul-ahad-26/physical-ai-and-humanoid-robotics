@@ -46,7 +46,7 @@ def create_app() -> FastAPI:
         CORSMiddleware,
         allow_origins=settings.cors_origins,
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["*"],
         expose_headers=["Set-Cookie"],
     )
@@ -57,9 +57,11 @@ def create_app() -> FastAPI:
     from src.api.sessions import router as sessions_router
     from src.api.ingest import router as ingest_router
     from src.api.auth import router as auth_router
+    from src.api.oauth import router as oauth_router
 
     app.include_router(health_router)
     app.include_router(auth_router)
+    app.include_router(oauth_router)
     app.include_router(chat_router, prefix="/api")
     app.include_router(sessions_router, prefix="/api")
     app.include_router(ingest_router, prefix="/api")

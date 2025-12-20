@@ -128,6 +128,83 @@
   text-decoration: underline;
 }
 
+/* OAuth Buttons */
+.oauthButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.oauthButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+}
+
+.oauthButton:hover:not(:disabled) {
+  background-color: #f8f9fa;
+  border-color: #c0c0c0;
+  transform: translateY(-1px);
+}
+
+.oauthButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.oauthButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.oauthIcon {
+  flex-shrink: 0;
+}
+
+.googleButton {
+  color: #3c4043;
+}
+
+.googleButton:hover:not(:disabled) {
+  background-color: #f8f9fa;
+}
+
+.githubButton {
+  color: #24292f;
+}
+
+.githubButton:hover:not(:disabled) {
+  background-color: #f6f8fa;
+}
+
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  color: #888;
+  font-size: 0.85rem;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e0e0e0;
+}
+
 /* Responsive adjustments */
 @media (max-width: 480px) {
   .container {

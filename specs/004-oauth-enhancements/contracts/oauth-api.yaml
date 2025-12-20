@@ -1,0 +1,298 @@
+openapi: 3.0.3
+info:
+  title: OAuth Authentication API
+  description: |
+    OAuth authentication endpoints for Google and GitHub sign-in.
+    Extends the existing Better Auth-compatible API.
+  version: 1.0.0
+  contact:
+    name: Physical AI Textbook
+servers:
+  - url: https://api.example.com
+    description: Production
+  - url: http://localhost:8000
+    description: Development
+
+paths:
+  /api/auth/oauth/google:
+    get:
+      summary: Initiate Google OAuth
+      description: |
+        Initiates Google OAuth flow by redirecting to Google's authorization endpoint.
+        Generates CSRF state parameter and stores in session.
+      operationId: initiateGoogleOAuth
+      tags:
+        - OAuth
+      parameters:
+        - name: callbackURL
+          in: query
+          description: URL to redirect after successful OAuth
+          schema:
+            type: string
+            default: "/"
+      responses:
+        '302':
+          description: Redirect to Google OAuth authorization
+          headers:
+            Location:
+              description: Google OAuth authorization URL
+              schema:
+                type: string
+                example: https://accounts.google.com/o/oauth2/v2/auth?client_id=...&redirect_uri=...&scope=...&state=...
+
+  /api/auth/oauth/github:
+    get:
+      summary: Initiate GitHub OAuth
+      description: |
+        Initiates GitHub OAuth flow by redirecting to GitHub's authorization endpoint.
+        Generates CSRF state parameter and stores in session.
+      operationId: initiateGitHubOAuth
+      tags:
+        - OAuth
+      parameters:
+        - name: callbackURL
+          in: query
+          description: URL to redirect after successful OAuth
+          schema:
+            type: string
+            default: "/"
+      responses:
+        '302':
+          description: Redirect to GitHub OAuth authorization
+          headers:
+            Location:
+              description: GitHub OAuth authorization URL
+              schema:
+                type: string
+                example: https://github.com/login/oauth/authorize?client_id=...&redirect_uri=...&scope=...&state=...
+
+  /api/auth/callback/google:
+    get:
+      summary: Google OAuth callback
+      description: |
+        Handles Google OAuth callback after user consents.
+        Exchanges authorization code for tokens, fetches user profile,
+        creates/updates user account, and establishes session.
+      operationId: googleOAuthCallback
+      tags:
+        - OAuth
+      parameters:
+        - name: code
+          in: query
+          required: true
+          description: Authorization code from Google
+          schema:
+            type: string
+        - name: state
+          in: query
+          required: true
+          description: CSRF state parameter
+          schema:
+            type: string
+        - name: error
+          in: query
+          description: Error code if user denied consent
+          schema:
+            type: string
+        - name: error_description
+          in: query
+          description: Human-readable error description
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirect to frontend
+          headers:
+            Location:
+              description: Frontend URL (/ on success, /login?error=... on failure)
+              schema:
+                type: string
+            Set-Cookie:
+              description: Session cookie (on success only)
+              schema:
+                type: string
+                example: session=xxx; HttpOnly; Secure; SameSite=None; Max-Age=604800
+
+  /api/auth/callback/github:
+    get:
+      summary: GitHub OAuth callback
+      description: |
+        Handles GitHub OAuth callback after user authorizes.
+        Exchanges authorization code for tokens, fetches user profile,
+        creates/updates user account, and establishes session.
+      operationId: githubOAuthCallback
+      tags:
+        - OAuth
+      parameters:
+        - name: code
+          in: query
+          required: true
+          description: Authorization code from GitHub
+          schema:
+            type: string
+        - name: state
+          in: query
+          required: true
+          description: CSRF state parameter
+          schema:
+            type: string
+        - name: error
+          in: query
+          description: Error code if user denied authorization
+          schema:
+            type: string
+        - name: error_description
+          in: query
+          description: Human-readable error description
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirect to frontend
+          headers:
+            Location:
+              description: Frontend URL (/ on success, /login?error=... on failure)
+              schema:
+                type: string
+            Set-Cookie:
+              description: Session cookie (on success only)
+              schema:
+                type: string
+                example: session=xxx; HttpOnly; Secure; SameSite=None; Max-Age=604800
+
+  /api/auth/session:
+    get:
+      summary: Get current session (Extended)
+      description: |
+        Returns current session information including user details.
+        Extended to include display_name and auth_provider fields.
+      operationId: getSession
+      tags:
+        - Session
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Active session found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+              example:
+                user:
+                  id: "550e8400-e29b-41d4-a716-446655440000"
+                  email: "user@example.com"
+                  display_name: "John Smith"
+                  auth_provider: "google"
+                session:
+                  expires_at: "2025-12-26T10:00:00Z"
+        '401':
+          description: No active session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: "AUTH_003"
+                  message: "No active session"
+
+components:
+  schemas:
+    UserResponse:
+      type: object
+      required:
+        - id
+        - email
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique user identifier
+        email:
+          type: string
+          format: email
+          description: User's email address
+        display_name:
+          type: string
+          nullable: true
+          maxLength: 100
+          description: User's display name (from OAuth or self-set)
+        auth_provider:
+          type: string
+          enum: [email, google, github]
+          description: Authentication method used
+        created_at:
+          type: string
+          format: date-time
+          description: Account creation timestamp
+        last_login:
+          type: string
+          format: date-time
+          nullable: true
+          description: Last successful login timestamp
+
+    SessionInfo:
+      type: object
+      required:
+        - expires_at
+      properties:
+        expires_at:
+          type: string
+          format: date-time
+          description: Session expiration timestamp
+
+    SessionResponse:
+      type: object
+      required:
+        - user
+        - session
+      properties:
+        user:
+          $ref: '#/components/schemas/UserResponse'
+        session:
+          $ref: '#/components/schemas/SessionInfo'
+
+    ErrorDetail:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Error code for programmatic handling
+          enum:
+            - AUTH_001  # Invalid credentials
+            - AUTH_002  # Email already registered
+            - AUTH_003  # No active session
+            - AUTH_004  # OAuth provider error
+            - AUTH_005  # Invalid password
+        message:
+          type: string
+          description: Human-readable error message
+        field:
+          type: string
+          nullable: true
+          description: Field that caused the error (if applicable)
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: session
+      description: HTTP-only session cookie
+
+tags:
+  - name: OAuth
+    description: OAuth authentication endpoints
+  - name: Session
+    description: Session management endpoints
