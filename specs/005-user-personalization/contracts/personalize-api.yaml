@@ -1,0 +1,219 @@
+openapi: 3.0.3
+info:
+  title: Personalization API
+  description: AI-powered content personalization endpoint
+  version: 1.0.0
+  contact:
+    name: Physical AI Textbook Team
+
+servers:
+  - url: http://localhost:8000
+    description: Development server
+  - url: https://api.physicalai.dev
+    description: Production server
+
+paths:
+  /api/personalize:
+    post:
+      summary: Personalize chapter content
+      description: |
+        Generate personalized chapter content based on user's technical background.
+
+        **Rate Limit**: 10 requests per minute per user.
+
+        **Requirements**:
+        - User must be authenticated
+        - User must have completed their profile (profile_completed = true)
+
+        **Behavior**:
+        - Content is adapted based on software_background and hardware_background
+        - Code blocks are preserved exactly as-is
+        - Factual information is never altered
+        - Results are cached for the session duration
+      operationId: personalizeContent
+      tags:
+        - Personalization
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonalizeRequest'
+            example:
+              chapter_id: "chapter-3"
+              content: "# Neural Networks\n\nNeural networks are computational models inspired by biological neurons..."
+              title: "Introduction to Neural Networks"
+      responses:
+        '200':
+          description: Content personalized successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonalizeResponse'
+              example:
+                success: true
+                personalized_content: "# Neural Networks\n\nSince you have experience with Python and TensorFlow, let's explore neural networks from a practical standpoint..."
+                metadata:
+                  user_level: "intermediate"
+                  adaptations_made:
+                    - "adjusted_depth"
+                    - "added_code_examples"
+                    - "framework_specific_references"
+                  cached: false
+                  response_time_ms: 3500
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Missing required field: content"
+                code: "VALIDATION_ERROR"
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Not authenticated"
+                code: "UNAUTHORIZED"
+        '403':
+          description: Profile not completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Profile must be completed before personalizing content"
+                code: "PROFILE_INCOMPLETE"
+        '429':
+          description: Rate limit exceeded
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Seconds until rate limit resets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Rate limit exceeded. Try again in 45 seconds."
+                code: "RATE_LIMITED"
+        '500':
+          description: AI service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "AI service unavailable. Please try again."
+                code: "AI_SERVICE_ERROR"
+        '504':
+          description: AI service timeout
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Personalization request timed out. Please try again."
+                code: "AI_TIMEOUT"
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: session
+      description: Session token cookie set by authentication
+
+  schemas:
+    PersonalizeRequest:
+      type: object
+      required:
+        - chapter_id
+        - content
+        - title
+      properties:
+        chapter_id:
+          type: string
+          maxLength: 100
+          description: Unique identifier for the chapter (e.g., "chapter-3")
+          example: "chapter-3"
+        content:
+          type: string
+          minLength: 1
+          maxLength: 100000
+          description: Original markdown content of the chapter
+        title:
+          type: string
+          maxLength: 200
+          description: Chapter title for context
+          example: "Introduction to Neural Networks"
+
+    PersonalizeResponse:
+      type: object
+      required:
+        - success
+        - personalized_content
+        - metadata
+      properties:
+        success:
+          type: boolean
+          description: Whether personalization was successful
+        personalized_content:
+          type: string
+          description: Personalized markdown content
+        metadata:
+          $ref: '#/components/schemas/PersonalizationMetadata'
+
+    PersonalizationMetadata:
+      type: object
+      properties:
+        user_level:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          description: User's software experience level used for adaptation
+        adaptations_made:
+          type: array
+          items:
+            type: string
+          description: List of adaptation types applied
+          example:
+            - "adjusted_depth"
+            - "added_analogies"
+            - "framework_specific_references"
+        cached:
+          type: boolean
+          description: Whether the response was served from cache
+        response_time_ms:
+          type: integer
+          description: Time taken to generate the response in milliseconds
+
+    Error:
+      type: object
+      required:
+        - error
+        - code
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+        code:
+          type: string
+          description: Machine-readable error code
+          enum:
+            - VALIDATION_ERROR
+            - UNAUTHORIZED
+            - PROFILE_INCOMPLETE
+            - RATE_LIMITED
+            - AI_SERVICE_ERROR
+            - AI_TIMEOUT
+
+tags:
+  - name: Personalization
+    description: AI-powered content personalization operations

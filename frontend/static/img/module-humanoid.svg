@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 150" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="bgGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f0f8f5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e6f4ed;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="200" height="150" fill="url(#bgGrad3)"/>
+
+  <!-- Humanoid Robot Figure -->
+  <g transform="translate(100, 20)" opacity="0.7">
+    <!-- Head -->
+    <ellipse cx="0" cy="0" rx="15" ry="18" fill="#2d7a4e"/>
+    <circle cx="-5" cy="-3" r="2" fill="white"/>
+    <circle cx="5" cy="-3" r="2" fill="white"/>
+    <path d="M -6 5 Q 0 8 6 5" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+
+    <!-- Neck -->
+    <rect x="-5" y="18" width="10" height="8" fill="#2d7a4e"/>
+
+    <!-- Torso -->
+    <rect x="-20" y="26" width="40" height="45" rx="4" fill="#2d7a4e"/>
+    <line x1="-15" y1="35" x2="15" y2="35" stroke="#4aac73" stroke-width="2"/>
+    <line x1="-15" y1="50" x2="15" y2="50" stroke="#4aac73" stroke-width="2"/>
+    <circle cx="0" cy="55" r="4" fill="#4aac73"/>
+
+    <!-- Arms -->
+    <g>
+      <!-- Left arm -->
+      <rect x="-35" y="30" width="12" height="35" rx="3" fill="#338b5a"/>
+      <rect x="-35" y="65" width="12" height="25" rx="3" fill="#338b5a"/>
+      <circle cx="-29" cy="65" r="4" fill="#2d7a4e"/>
+
+      <!-- Right arm -->
+      <rect x="23" y="30" width="12" height="35" rx="3" fill="#338b5a"/>
+      <rect x="23" y="65" width="12" height="25" rx="3" fill="#338b5a"/>
+      <circle cx="29" cy="65" r="4" fill="#2d7a4e"/>
+    </g>
+
+    <!-- Legs -->
+    <g>
+      <!-- Left leg -->
+      <rect x="-17" y="71" width="14" height="35" rx="3" fill="#2d7a4e"/>
+      <rect x="-17" y="106" width="14" height="20" rx="3" fill="#338b5a"/>
+      <circle cx="-10" cy="106" r="4" fill="#2d7a4e"/>
+
+      <!-- Right leg -->
+      <rect x="3" y="71" width="14" height="35" rx="3" fill="#2d7a4e"/>
+      <rect x="3" y="106" width="14" height="20" rx="3" fill="#338b5a"/>
+      <circle cx="10" cy="106" r="4" fill="#2d7a4e"/>
+    </g>
+  </g>
+
+  <!-- Motion lines -->
+  <g opacity="0.3">
+    <path d="M 60 60 Q 50 70 55 80" stroke="#4aac73" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M 140 60 Q 150 70 145 80" stroke="#4aac73" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>

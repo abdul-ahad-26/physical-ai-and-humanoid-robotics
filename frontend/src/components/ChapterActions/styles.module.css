@@ -1,0 +1,203 @@
+/**
+ * ChapterActions Component Styles
+ *
+ * Styles for the personalization and translation action buttons
+ * shown on chapter pages.
+ */
+
+.chapterActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: var(--ifm-background-surface-color);
+  border-radius: 8px;
+  border: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ifm-color-primary-darkest);
+  background-color: var(--ifm-color-primary-lightest);
+  border: 1px solid var(--ifm-color-primary-light);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.actionButton:hover:not(:disabled) {
+  background-color: var(--ifm-color-primary-lighter);
+  border-color: var(--ifm-color-primary);
+}
+
+.actionButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.actionButton.active {
+  background-color: var(--ifm-color-primary);
+  color: white;
+  border-color: var(--ifm-color-primary-dark);
+}
+
+.actionButton.active:hover:not(:disabled) {
+  background-color: var(--ifm-color-primary-dark);
+}
+
+/* Translate button specific styles */
+.translateButton {
+  background-color: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+
+.translateButton:hover:not(:disabled) {
+  background-color: #fde68a;
+  border-color: #f59e0b;
+}
+
+.translateButton.active {
+  background-color: #f59e0b;
+  color: white;
+  border-color: #d97706;
+}
+
+.translateButton.active:hover:not(:disabled) {
+  background-color: #d97706;
+}
+
+/* Loading spinner */
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Status message */
+.statusMessage {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  color: var(--ifm-color-emphasis-700);
+  background-color: var(--ifm-color-emphasis-100);
+  border-radius: 4px;
+}
+
+.statusMessage.error {
+  color: #dc2626;
+  background-color: #fef2f2;
+}
+
+.statusMessage.success {
+  color: #059669;
+  background-color: #ecfdf5;
+}
+
+/* Login prompt */
+.loginPrompt {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--ifm-color-emphasis-700);
+  background-color: var(--ifm-color-emphasis-100);
+  border-radius: 6px;
+  flex: 1;
+}
+
+.loginPrompt a {
+  color: var(--ifm-color-primary);
+  text-decoration: underline;
+}
+
+/* Profile incomplete warning */
+.profileWarning {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: #92400e;
+  background-color: #fef3c7;
+  border-radius: 6px;
+  flex: 1;
+}
+
+.profileWarning a {
+  color: #d97706;
+  text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .chapterActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actionButton {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .loginPrompt,
+  .profileWarning {
+    text-align: center;
+    justify-content: center;
+  }
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .actionButton {
+  color: var(--ifm-color-primary-lightest);
+  background-color: var(--ifm-color-primary-darkest);
+  border-color: var(--ifm-color-primary-dark);
+}
+
+[data-theme='dark'] .actionButton:hover:not(:disabled) {
+  background-color: var(--ifm-color-primary-darker);
+}
+
+[data-theme='dark'] .translateButton {
+  background-color: #78350f;
+  color: #fef3c7;
+  border-color: #92400e;
+}
+
+[data-theme='dark'] .translateButton:hover:not(:disabled) {
+  background-color: #92400e;
+}
+
+[data-theme='dark'] .translateButton.active {
+  background-color: #f59e0b;
+  color: #78350f;
+}
+
+[data-theme='dark'] .loginPrompt {
+  background-color: var(--ifm-color-emphasis-200);
+}
+
+[data-theme='dark'] .profileWarning {
+  background-color: #78350f;
+  color: #fef3c7;
+}

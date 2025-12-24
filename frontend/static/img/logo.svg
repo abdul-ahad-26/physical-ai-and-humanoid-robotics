@@ -1,6 +1,36 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" fill="#444444" />
-  <text x="50" y="55" font-family="Arial, sans-serif" font-size="20" fill="white" text-anchor="middle">PAI</text>
-  <circle cx="50" cy="30" r="15" fill="#66f" />
-  <rect x="35" y="45" width="30" height="25" fill="#66f" />
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="48" fill="#2d7a4e" opacity="0.1"/>
+
+  <!-- Humanoid Robot Silhouette -->
+  <!-- Head -->
+  <circle cx="50" cy="30" r="12" fill="#2d7a4e" stroke="#2d7a4e" stroke-width="1.5"/>
+
+  <!-- AI Brain symbol inside head -->
+  <path d="M 45 28 Q 50 24 55 28" stroke="#ffffff" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M 45 32 Q 50 36 55 32" stroke="#ffffff" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <circle cx="47" cy="30" r="1" fill="#ffffff"/>
+  <circle cx="53" cy="30" r="1" fill="#ffffff"/>
+
+  <!-- Body -->
+  <rect x="43" y="42" width="14" height="20" rx="2" fill="#2d7a4e"/>
+
+  <!-- Arms -->
+  <line x1="43" y1="46" x2="35" y2="54" stroke="#2d7a4e" stroke-width="3" stroke-linecap="round"/>
+  <line x1="57" y1="46" x2="65" y2="54" stroke="#2d7a4e" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Legs -->
+  <line x1="46" y1="62" x2="42" y2="75" stroke="#2d7a4e" stroke-width="3" stroke-linecap="round"/>
+  <line x1="54" y1="62" x2="58" y2="75" stroke="#2d7a4e" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Energy/Signal lines (representing AI) -->
+  <path d="M 32 35 L 28 38 L 30 40" stroke="#4aac73" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.8"/>
+  <path d="M 68 35 L 72 38 L 70 40" stroke="#4aac73" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.8"/>
+
+  <!-- Movement indicator dots -->
+  <circle cx="42" cy="76" r="2" fill="#2d7a4e"/>
+  <circle cx="58" cy="76" r="2" fill="#2d7a4e"/>
+
+  <!-- Circuit pattern accent -->
+  <path d="M 50 85 L 50 88 M 48 87 L 52 87" stroke="#2d7a4e" stroke-width="1" opacity="0.6"/>
 </svg>

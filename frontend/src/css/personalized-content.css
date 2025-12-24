@@ -1,0 +1,91 @@
+/**
+ * Personalized and Translated Content Container Styles
+ *
+ * Uses Docusaurus CSS variables to support both light and dark themes.
+ * All colors adapt automatically based on the active theme.
+ */
+
+.personalized-content-container {
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+
+  /* Use theme-aware colors */
+  background-color: var(--ifm-color-info-contrast-background);
+  border: 2px solid var(--ifm-color-info);
+  color: var(--ifm-font-color-base);
+}
+
+/* Dark mode specific adjustments */
+[data-theme='dark'] .personalized-content-container {
+  background-color: var(--ifm-background-surface-color);
+  border-color: var(--ifm-color-info-dark);
+}
+
+.personalized-content-badge {
+  margin-bottom: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 600;
+
+  /* Light theme */
+  background-color: var(--ifm-color-info-contrast-background);
+  color: var(--ifm-color-info-dark);
+}
+
+/* Dark mode badge */
+[data-theme='dark'] .personalized-content-badge {
+  background-color: var(--ifm-color-info-darkest);
+  color: var(--ifm-color-info-contrast-foreground);
+}
+
+/* Ensure markdown content inherits theme colors */
+.personalized-content-container .markdown {
+  color: var(--ifm-font-color-base);
+}
+
+.personalized-content-container .markdown h1,
+.personalized-content-container .markdown h2,
+.personalized-content-container .markdown h3,
+.personalized-content-container .markdown h4,
+.personalized-content-container .markdown h5,
+.personalized-content-container .markdown h6 {
+  color: var(--ifm-heading-color);
+}
+
+.personalized-content-container .markdown a {
+  color: var(--ifm-link-color);
+}
+
+.personalized-content-container .markdown a:hover {
+  color: var(--ifm-link-hover-color);
+}
+
+.personalized-content-container .markdown code {
+  background-color: var(--ifm-code-background);
+  color: var(--ifm-code-color);
+  border: 1px solid var(--ifm-color-emphasis-300);
+}
+
+.personalized-content-container .markdown pre {
+  background-color: var(--ifm-pre-background);
+  border: 1px solid var(--ifm-color-emphasis-300);
+}
+
+.personalized-content-container .markdown pre code {
+  background-color: transparent;
+  border: none;
+}
+
+/* Ensure RTL text alignment for badge in translated content */
+.translated-content-urdu .personalized-content-badge {
+  text-align: right;
+}
+
+/* Additional RTL support - keep code blocks LTR */
+.translated-content-urdu pre,
+.translated-content-urdu code {
+  direction: ltr !important;
+  text-align: left !important;
+}

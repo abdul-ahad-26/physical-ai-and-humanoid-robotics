@@ -58,10 +58,16 @@ def create_app() -> FastAPI:
     from src.api.ingest import router as ingest_router
     from src.api.auth import router as auth_router
     from src.api.oauth import router as oauth_router
+    from src.api.profile import router as profile_router
+    from src.api.personalize import router as personalize_router
+    from src.api.translate import router as translate_router
 
     app.include_router(health_router)
     app.include_router(auth_router)
     app.include_router(oauth_router)
+    app.include_router(profile_router)  # 005-user-personalization
+    app.include_router(personalize_router)  # 005-user-personalization
+    app.include_router(translate_router)  # 005-user-personalization
     app.include_router(chat_router, prefix="/api")
     app.include_router(sessions_router, prefix="/api")
     app.include_router(ingest_router, prefix="/api")

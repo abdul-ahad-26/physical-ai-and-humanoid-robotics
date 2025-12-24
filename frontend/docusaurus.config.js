@@ -68,6 +68,14 @@ const config = {
     ],
   ],
 
+  // Stylesheets for custom fonts (Urdu RTL support)
+  stylesheets: [
+    {
+      href: 'https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu&display=swap',
+      type: 'text/css',
+    },
+  ],
+
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
@@ -84,7 +92,7 @@ const config = {
             type: 'docSidebar',
             sidebarId: 'textbookSidebar',
             position: 'left',
-            label: 'Textbook',
+            label: 'Curriculum',
           },
           {
             href: 'https://github.com/abdul-ahad-26/physical-ai-and-humanoid-robotics',

@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 150" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="bgGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f0f8f5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e6f4ed;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="200" height="150" fill="url(#bgGrad2)"/>
+
+  <!-- ROS 2 Node graph representation -->
+  <g opacity="0.7">
+    <!-- Central node -->
+    <rect x="80" y="60" width="40" height="30" rx="4" fill="#2d7a4e"/>
+    <text x="100" y="78" font-family="Arial, sans-serif" font-size="10" fill="white" text-anchor="middle" font-weight="bold">ROS2</text>
+
+    <!-- Surrounding nodes -->
+    <circle cx="40" cy="40" r="15" fill="#4aac73" opacity="0.8"/>
+    <text x="40" y="43" font-family="Arial, sans-serif" font-size="8" fill="white" text-anchor="middle">Nav</text>
+
+    <circle cx="160" cy="40" r="15" fill="#4aac73" opacity="0.8"/>
+    <text x="160" y="43" font-family="Arial, sans-serif" font-size="8" fill="white" text-anchor="middle">Sim</text>
+
+    <circle cx="40" cy="110" r="15" fill="#4aac73" opacity="0.8"/>
+    <text x="40" y="113" font-family="Arial, sans-serif" font-size="8" fill="white" text-anchor="middle">Ctrl</text>
+
+    <circle cx="160" cy="110" r="15" fill="#4aac73" opacity="0.8"/>
+    <text x="160" y="113" font-family="Arial, sans-serif" font-size="8" fill="white" text-anchor="middle">Viz</text>
+
+    <!-- Connections -->
+    <line x1="55" y1="45" x2="80" y2="65" stroke="#2d7a4e" stroke-width="2" opacity="0.5"/>
+    <line x1="145" y1="45" x2="120" y2="65" stroke="#2d7a4e" stroke-width="2" opacity="0.5"/>
+    <line x1="55" y1="105" x2="80" y2="85" stroke="#2d7a4e" stroke-width="2" opacity="0.5"/>
+    <line x1="145" y1="105" x2="120" y2="85" stroke="#2d7a4e" stroke-width="2" opacity="0.5"/>
+
+    <!-- Data flow arrows -->
+    <path d="M 70 65 L 67 63 L 67 67 Z" fill="#2d7a4e"/>
+    <path d="M 130 65 L 133 63 L 133 67 Z" fill="#2d7a4e"/>
+  </g>
+
+  <!-- Grid pattern in background -->
+  <g opacity="0.1">
+    <line x1="0" y1="50" x2="200" y2="50" stroke="#2d7a4e" stroke-width="1"/>
+    <line x1="0" y1="100" x2="200" y2="100" stroke="#2d7a4e" stroke-width="1"/>
+    <line x1="50" y1="0" x2="50" y2="150" stroke="#2d7a4e" stroke-width="1"/>
+    <line x1="100" y1="0" x2="100" y2="150" stroke="#2d7a4e" stroke-width="1"/>
+    <line x1="150" y1="0" x2="150" y2="150" stroke="#2d7a4e" stroke-width="1"/>
+  </g>
+</svg>

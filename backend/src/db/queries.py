@@ -20,6 +20,12 @@ from .models import (
     PerformanceMetric,
     PerformanceMetricCreate,
     Citation,
+    UserProfile,
+    SoftwareBackground,
+    HardwareBackground,
+    ProfileUpdateRequest,
+    PersonalizationLogEntry,
+    TranslationLogEntry,
 )
 
 
@@ -322,3 +328,272 @@ async def create_performance_metric(data: PerformanceMetricCreate) -> Performanc
             data.model_id,
         )
         return PerformanceMetric(**dict(row))
+
+
+# ============================================================================
+# User Profile Operations (005-user-personalization)
+# ============================================================================
+
+
+async def get_user_profile(user_id: UUID) -> Optional[UserProfile]:
+    """
+    Get a user's full profile including technical background.
+
+    Args:
+        user_id: UUID of the user
+
+    Returns:
+        UserProfile or None if not found
+    """
+    pool = await get_db_pool()
+
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            SELECT id, email, display_name, auth_provider,
+                   software_background, hardware_background, profile_completed
+            FROM users WHERE id = $1
+            """,
+            user_id,
+        )
+        if not row:
+            return None
+
+        result = dict(row)
+
+        # Parse JSONB fields (asyncpg may return JSONB as strings or dicts depending on driver)
+        if result["software_background"]:
+            if isinstance(result["software_background"], str):
+                result["software_background"] = SoftwareBackground(**json.loads(result["software_background"]))
+            else:
+                result["software_background"] = SoftwareBackground(**result["software_background"])
+        if result["hardware_background"]:
+            if isinstance(result["hardware_background"], str):
+                result["hardware_background"] = HardwareBackground(**json.loads(result["hardware_background"]))
+            else:
+                result["hardware_background"] = HardwareBackground(**result["hardware_background"])
+
+        return UserProfile(**result)
+
+
+async def update_user_profile(user_id: UUID, data: ProfileUpdateRequest) -> Optional[UserProfile]:
+    """
+    Update a user's profile with display name and/or technical background.
+
+    Automatically sets profile_completed=true when both software and hardware
+    background levels are provided.
+
+    Args:
+        user_id: UUID of the user
+        data: ProfileUpdateRequest with fields to update
+
+    Returns:
+        Updated UserProfile or None if user not found
+    """
+    pool = await get_db_pool()
+
+    async with pool.acquire() as conn:
+        # Build dynamic update query
+        updates = []
+        params = [user_id]
+        param_count = 1
+
+        if data.display_name is not None:
+            param_count += 1
+            updates.append(f"display_name = ${param_count}")
+            params.append(data.display_name.strip())
+
+        if data.software_background is not None:
+            param_count += 1
+            updates.append(f"software_background = ${param_count}::jsonb")
+            params.append(json.dumps(data.software_background.model_dump()))
+
+        if data.hardware_background is not None:
+            param_count += 1
+            updates.append(f"hardware_background = ${param_count}::jsonb")
+            params.append(json.dumps(data.hardware_background.model_dump()))
+
+        # Auto-set profile_completed if both backgrounds have levels
+        if data.software_background is not None and data.hardware_background is not None:
+            if data.software_background.level and data.hardware_background.level:
+                updates.append("profile_completed = TRUE")
+
+        if not updates:
+            # Nothing to update, just return current profile
+            return await get_user_profile(user_id)
+
+        query = f"""
+            UPDATE users
+            SET {", ".join(updates)}
+            WHERE id = $1
+            RETURNING id, email, display_name, auth_provider,
+                      software_background, hardware_background, profile_completed
+        """
+
+        row = await conn.fetchrow(query, *params)
+        if not row:
+            return None
+
+        result = dict(row)
+
+        # Parse JSONB fields (asyncpg may return JSONB as strings or dicts depending on driver)
+        if result["software_background"]:
+            if isinstance(result["software_background"], str):
+                result["software_background"] = SoftwareBackground(**json.loads(result["software_background"]))
+            else:
+                result["software_background"] = SoftwareBackground(**result["software_background"])
+        if result["hardware_background"]:
+            if isinstance(result["hardware_background"], str):
+                result["hardware_background"] = HardwareBackground(**json.loads(result["hardware_background"]))
+            else:
+                result["hardware_background"] = HardwareBackground(**result["hardware_background"])
+
+        return UserProfile(**result)
+
+
+# ============================================================================
+# Audit Log Operations (005-user-personalization)
+# ============================================================================
+
+
+async def log_personalization(
+    user_id: UUID,
+    chapter_id: str,
+    status: str,
+    response_time_ms: Optional[int] = None,
+    error_message: Optional[str] = None,
+) -> UUID:
+    """
+    Log a personalization request for auditing.
+
+    Args:
+        user_id: UUID of the user
+        chapter_id: Identifier of the chapter
+        status: 'success', 'failure', or 'timeout'
+        response_time_ms: Optional response time in milliseconds
+        error_message: Optional error message if failed
+
+    Returns:
+        UUID of the created log entry
+    """
+    pool = await get_db_pool()
+
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            INSERT INTO personalization_logs
+            (user_id, chapter_id, status, response_time_ms, error_message)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING id
+            """,
+            user_id,
+            chapter_id,
+            status,
+            response_time_ms,
+            error_message,
+        )
+        return row["id"]
+
+
+async def log_translation(
+    user_id: UUID,
+    chapter_id: str,
+    target_language: str,
+    status: str,
+    response_time_ms: Optional[int] = None,
+    error_message: Optional[str] = None,
+) -> UUID:
+    """
+    Log a translation request for auditing.
+
+    Args:
+        user_id: UUID of the user
+        chapter_id: Identifier of the chapter
+        target_language: Target language code (e.g., 'ur')
+        status: 'success', 'failure', or 'timeout'
+        response_time_ms: Optional response time in milliseconds
+        error_message: Optional error message if failed
+
+    Returns:
+        UUID of the created log entry
+    """
+    pool = await get_db_pool()
+
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            INSERT INTO translation_logs
+            (user_id, chapter_id, target_language, status, response_time_ms, error_message)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING id
+            """,
+            user_id,
+            chapter_id,
+            target_language,
+            status,
+            response_time_ms,
+            error_message,
+        )
+        return row["id"]
+
+
+async def get_user_personalization_history(
+    user_id: UUID, limit: int = 20
+) -> List[PersonalizationLogEntry]:
+    """
+    Get a user's personalization request history.
+
+    Args:
+        user_id: UUID of the user
+        limit: Maximum number of entries to return
+
+    Returns:
+        List of PersonalizationLogEntry
+    """
+    pool = await get_db_pool()
+
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(
+            """
+            SELECT id, user_id, chapter_id, request_timestamp,
+                   response_time_ms, status, error_message
+            FROM personalization_logs
+            WHERE user_id = $1
+            ORDER BY request_timestamp DESC
+            LIMIT $2
+            """,
+            user_id,
+            limit,
+        )
+        return [PersonalizationLogEntry(**dict(row)) for row in rows]
+
+
+async def get_user_translation_history(
+    user_id: UUID, limit: int = 20
+) -> List[TranslationLogEntry]:
+    """
+    Get a user's translation request history.
+
+    Args:
+        user_id: UUID of the user
+        limit: Maximum number of entries to return
+
+    Returns:
+        List of TranslationLogEntry
+    """
+    pool = await get_db_pool()
+
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(
+            """
+            SELECT id, user_id, chapter_id, target_language, request_timestamp,
+                   response_time_ms, status, error_message
+            FROM translation_logs
+            WHERE user_id = $1
+            ORDER BY request_timestamp DESC
+            LIMIT $2
+            """,
+            user_id,
+            limit,
+        )
+        return [TranslationLogEntry(**dict(row)) for row in rows]

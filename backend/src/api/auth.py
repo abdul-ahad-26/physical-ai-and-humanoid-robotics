@@ -339,6 +339,7 @@ async def get_session(session_token: Optional[str] = Cookie(None, alias="session
     Validate current session and return user information.
 
     Used by frontend to check authentication status.
+    Includes profile_completed flag for 005-user-personalization feature.
     """
 
     if not session_token:
@@ -356,10 +357,11 @@ async def get_session(session_token: Optional[str] = Cookie(None, alias="session
     pool = await get_db_pool()
 
     async with pool.acquire() as conn:
-        # Query session with user join
+        # Query session with user join - include profile_completed
         session = await conn.fetchrow(
             """
-            SELECT s.expires_at, u.id, u.email, u.display_name, u.auth_provider
+            SELECT s.expires_at, u.id, u.email, u.display_name, u.auth_provider,
+                   COALESCE(u.profile_completed, FALSE) as profile_completed
             FROM auth_sessions s
             JOIN users u ON s.user_id = u.id
             WHERE s.session_token = $1 AND s.expires_at > NOW()
@@ -386,7 +388,10 @@ async def get_session(session_token: Optional[str] = Cookie(None, alias="session
             display_name=session["display_name"],
             auth_provider=session["auth_provider"],
         ),
-        session={"expires_at": session["expires_at"].isoformat()},
+        session={
+            "expires_at": session["expires_at"].isoformat(),
+            "profile_completed": session["profile_completed"],
+        },
     )
 
 

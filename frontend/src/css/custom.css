@@ -4,15 +4,37 @@
  * work well for content-centric websites.
  */
 
-/* You can override the classic template styling here. */
+/* Import RTL styles for Urdu translation support (005-user-personalization) */
+@import './rtl.css';
+
+/* Import personalized content container styles (005-user-personalization) */
+@import './personalized-content.css';
+
+/* Ensure ChatWidget appears above TOC (005-user-personalization) */
+.chat-widget-container {
+  z-index: 10000 !important;
+}
+
+/* Dark Green Color Palette for Brand Consistency */
 :root {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
+  /* Dark green primary colors matching chatbot theme */
+  --ifm-color-primary: #2d7a4e;
+  --ifm-color-primary-dark: #276942;
+  --ifm-color-primary-darker: #25633e;
+  --ifm-color-primary-darkest: #1e5133;
+  --ifm-color-primary-light: #338b5a;
+  --ifm-color-primary-lighter: #399761;
+  --ifm-color-primary-lightest: #4aac73;
+
+  /* Success color (used by ChatWidget) - same dark green */
+  --ifm-color-success: #2d7a4e;
+  --ifm-color-success-dark: #276942;
+  --ifm-color-success-darker: #25633e;
+  --ifm-color-success-darkest: #1e5133;
+  --ifm-color-success-light: #338b5a;
+  --ifm-color-success-lighter: #399761;
+  --ifm-color-success-lightest: #4aac73;
+
   --ifm-code-font-size: 95%;
 }
 
@@ -82,14 +104,35 @@ html[data-theme='dark'] .docusaurus-highlight-code-line {
 }
 
 .footer__copyright {
-  color: var(--ifm-color-white) !important;
-  opacity: 0.8;
-  background-color: var(--ifm-color-primary-darker) !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+  background-color: transparent !important;
+  padding: 1rem 0;
+  font-weight: 400;
+  letter-spacing: 0.01em;
 }
 
-/* Dark mode compatibility for sections */
+/* About This Textbook section - normalized spacing and colors */
+.margin-vert--xl {
+  background-color: #ffffff;
+  padding: 4rem 0;
+  margin: 0 !important;
+}
+
+.margin-vert--xl h2 {
+  color: #1a1a1a;
+  font-weight: 600;
+  font-size: 2rem;
+}
+
+.margin-vert--xl p {
+  color: #4a4a4a;
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+/* Dark mode compatibility for About section */
 html[data-theme='dark'] .margin-vert--xl {
-  background-color: #242526;
+  background-color: #1b1b1d;
 }
 
 html[data-theme='dark'] .margin-vert--xl h2 {

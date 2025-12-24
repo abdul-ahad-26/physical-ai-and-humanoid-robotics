@@ -1,0 +1,279 @@
+openapi: 3.0.3
+info:
+  title: Profile API
+  description: User profile management endpoints for the personalization feature
+  version: 1.0.0
+  contact:
+    name: Physical AI Textbook Team
+
+servers:
+  - url: http://localhost:8000
+    description: Development server
+  - url: https://api.physicalai.dev
+    description: Production server
+
+paths:
+  /api/profile:
+    get:
+      summary: Get current user's profile
+      description: Retrieve the authenticated user's profile including technical background
+      operationId: getProfile
+      tags:
+        - Profile
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+              example:
+                user:
+                  id: "550e8400-e29b-41d4-a716-446655440000"
+                  email: "sarah@example.com"
+                  display_name: "Sarah Khan"
+                  auth_provider: "google"
+                  software_background:
+                    level: "intermediate"
+                    languages: ["Python", "JavaScript"]
+                    frameworks: ["TensorFlow", "React"]
+                  hardware_background:
+                    level: "basic"
+                    domains: ["basic_electronics", "robotics_kits"]
+                  profile_completed: true
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Not authenticated"
+                code: "UNAUTHORIZED"
+
+    post:
+      summary: Create or update user profile
+      description: Update the authenticated user's profile with display name and technical background
+      operationId: updateProfile
+      tags:
+        - Profile
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdateRequest'
+            example:
+              display_name: "Sarah Khan"
+              software_background:
+                level: "intermediate"
+                languages: ["Python", "JavaScript"]
+                frameworks: ["TensorFlow", "React"]
+              hardware_background:
+                level: "basic"
+                domains: ["basic_electronics", "robotics_kits"]
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileUpdateResponse'
+              example:
+                success: true
+                user:
+                  id: "550e8400-e29b-41d4-a716-446655440000"
+                  email: "sarah@example.com"
+                  display_name: "Sarah Khan"
+                  auth_provider: "google"
+                  software_background:
+                    level: "intermediate"
+                    languages: ["Python", "JavaScript"]
+                    frameworks: ["TensorFlow", "React"]
+                  hardware_background:
+                    level: "basic"
+                    domains: ["basic_electronics", "robotics_kits"]
+                  profile_completed: true
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                error: "Validation failed"
+                code: "VALIDATION_ERROR"
+                details:
+                  - field: "display_name"
+                    message: "Display name must be 100 characters or less"
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: session
+      description: Session token cookie set by authentication
+
+  schemas:
+    SoftwareBackground:
+      type: object
+      required:
+        - level
+      properties:
+        level:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          description: Overall software development experience level
+        languages:
+          type: array
+          items:
+            type: string
+          default: []
+          description: Programming languages the user knows
+          example: ["Python", "JavaScript", "C++"]
+        frameworks:
+          type: array
+          items:
+            type: string
+          default: []
+          description: Frameworks and libraries the user has experience with
+          example: ["TensorFlow", "PyTorch", "React"]
+
+    HardwareBackground:
+      type: object
+      required:
+        - level
+      properties:
+        level:
+          type: string
+          enum: [none, basic, intermediate, advanced]
+          description: Overall hardware/robotics experience level
+        domains:
+          type: array
+          items:
+            type: string
+            enum:
+              - basic_electronics
+              - robotics_kits
+              - gpus_accelerators
+              - jetson_edge
+              - embedded_systems
+              - sensors_actuators
+              - 3d_printing
+              - pcb_design
+          default: []
+          description: Hardware domains the user has experience with
+
+    UserProfile:
+      type: object
+      required:
+        - id
+        - email
+        - auth_provider
+        - profile_completed
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        display_name:
+          type: string
+          maxLength: 100
+          nullable: true
+        auth_provider:
+          type: string
+          enum: [email, google, github]
+        software_background:
+          $ref: '#/components/schemas/SoftwareBackground'
+          nullable: true
+        hardware_background:
+          $ref: '#/components/schemas/HardwareBackground'
+          nullable: true
+        profile_completed:
+          type: boolean
+
+    ProfileResponse:
+      type: object
+      required:
+        - user
+      properties:
+        user:
+          $ref: '#/components/schemas/UserProfile'
+
+    ProfileUpdateRequest:
+      type: object
+      properties:
+        display_name:
+          type: string
+          maxLength: 100
+          description: User's preferred display name
+        software_background:
+          $ref: '#/components/schemas/SoftwareBackground'
+        hardware_background:
+          $ref: '#/components/schemas/HardwareBackground'
+
+    ProfileUpdateResponse:
+      type: object
+      required:
+        - success
+        - user
+      properties:
+        success:
+          type: boolean
+        user:
+          $ref: '#/components/schemas/UserProfile'
+
+    Error:
+      type: object
+      required:
+        - error
+        - code
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+
+    ValidationError:
+      type: object
+      required:
+        - error
+        - code
+        - details
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+
+tags:
+  - name: Profile
+    description: User profile management operations
