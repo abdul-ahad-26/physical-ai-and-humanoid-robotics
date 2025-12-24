@@ -7,6 +7,78 @@ from uuid import UUID
 from pydantic import BaseModel, EmailStr, Field
 
 
+# =============================================================================
+# User Profile Models (005-user-personalization)
+# =============================================================================
+
+
+class SoftwareBackground(BaseModel):
+    """User's software development background."""
+
+    level: str = Field(..., pattern="^(beginner|intermediate|advanced)$")
+    languages: List[str] = Field(default_factory=list)
+    frameworks: List[str] = Field(default_factory=list)
+
+
+class HardwareBackground(BaseModel):
+    """User's hardware/robotics background."""
+
+    level: str = Field(..., pattern="^(none|basic|intermediate|advanced)$")
+    domains: List[str] = Field(default_factory=list)
+
+
+class UserProfile(BaseModel):
+    """Extended user profile with technical background."""
+
+    id: UUID
+    email: EmailStr
+    display_name: Optional[str] = None
+    auth_provider: str = "email"
+    software_background: Optional[SoftwareBackground] = None
+    hardware_background: Optional[HardwareBackground] = None
+    profile_completed: bool = False
+
+
+class ProfileUpdateRequest(BaseModel):
+    """Request to update user profile."""
+
+    display_name: Optional[str] = Field(None, max_length=100)
+    software_background: Optional[SoftwareBackground] = None
+    hardware_background: Optional[HardwareBackground] = None
+
+
+class ProfileUpdateResponse(BaseModel):
+    """Response from profile update."""
+
+    success: bool
+    user: UserProfile
+
+
+class PersonalizationLogEntry(BaseModel):
+    """Log entry for personalization requests."""
+
+    id: UUID
+    user_id: UUID
+    chapter_id: str
+    request_timestamp: datetime
+    response_time_ms: Optional[int] = None
+    status: str
+    error_message: Optional[str] = None
+
+
+class TranslationLogEntry(BaseModel):
+    """Log entry for translation requests."""
+
+    id: UUID
+    user_id: UUID
+    chapter_id: str
+    target_language: str
+    request_timestamp: datetime
+    response_time_ms: Optional[int] = None
+    status: str
+    error_message: Optional[str] = None
+
+
 class Citation(BaseModel):
     """Citation reference to a textbook section."""
 

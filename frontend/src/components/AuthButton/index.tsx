@@ -81,13 +81,20 @@ export default function AuthButton() {
       onClick={handleSignIn}
       style={{
         padding: '0.375rem 0.75rem',
-        backgroundColor: '#10B981',
+        backgroundColor: '#2d7a4e',
         color: 'white',
         border: 'none',
         borderRadius: '0.375rem',
         cursor: 'pointer',
         fontSize: '0.875rem',
         fontWeight: 500,
+        transition: 'background-color 0.2s ease',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = '#276942';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = '#2d7a4e';
       }}
     >
       Sign In

@@ -1,0 +1,166 @@
+/**
+ * RTL (Right-to-Left) Styles for Urdu Translation
+ *
+ * Applied when content is translated to Urdu.
+ * Code blocks remain LTR for proper display.
+ */
+
+/* Main RTL container for translated content */
+.translated-content-urdu {
+  direction: rtl;
+  text-align: right;
+  font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', serif;
+  line-height: 2;
+  font-size: 1.1em;
+}
+
+/* Urdu text line height and spacing */
+.translated-content-urdu p {
+  margin-bottom: 1.5em;
+  line-height: 2.2;
+}
+
+/* Headers in Urdu */
+.translated-content-urdu h1,
+.translated-content-urdu h2,
+.translated-content-urdu h3,
+.translated-content-urdu h4,
+.translated-content-urdu h5,
+.translated-content-urdu h6 {
+  direction: rtl;
+  text-align: right;
+  font-family: 'Noto Nastaliq Urdu', serif;
+  line-height: 1.8;
+  margin-bottom: 0.8em;
+}
+
+/* Lists in RTL */
+.translated-content-urdu ul,
+.translated-content-urdu ol {
+  direction: rtl;
+  text-align: right;
+  padding-right: 2em;
+  padding-left: 0;
+}
+
+.translated-content-urdu li {
+  margin-bottom: 0.5em;
+  line-height: 2;
+}
+
+/* Code blocks remain LTR */
+.translated-content-urdu pre,
+.translated-content-urdu code,
+.translated-content-urdu .prism-code {
+  direction: ltr !important;
+  text-align: left !important;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace !important;
+  unicode-bidi: embed;
+}
+
+/* Code block wrapper */
+.translated-content-urdu pre {
+  margin: 1.5em 0;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+/* Inline code */
+.translated-content-urdu code:not(pre code) {
+  direction: ltr;
+  text-align: left;
+  display: inline-block;
+  unicode-bidi: embed;
+  padding: 0.2em 0.4em;
+  font-size: 0.9em;
+  background-color: var(--ifm-code-background);
+  border-radius: 4px;
+}
+
+/* Tables remain LTR for data alignment */
+.translated-content-urdu table {
+  direction: ltr;
+  text-align: left;
+  width: 100%;
+  margin: 1.5em 0;
+}
+
+/* But table headers can be RTL for Urdu text */
+.translated-content-urdu th {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Blockquotes */
+.translated-content-urdu blockquote {
+  direction: rtl;
+  text-align: right;
+  border-right: 4px solid var(--ifm-color-primary);
+  border-left: none;
+  padding-right: 1em;
+  padding-left: 0;
+  margin-right: 0;
+  font-style: normal;
+}
+
+/* Links */
+.translated-content-urdu a {
+  direction: rtl;
+  unicode-bidi: embed;
+}
+
+/* Technical terms (English within Urdu text) */
+.translated-content-urdu .tech-term {
+  direction: ltr;
+  display: inline-block;
+  unicode-bidi: embed;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Admonitions/Callouts */
+.translated-content-urdu .admonition,
+.translated-content-urdu .alert {
+  direction: rtl;
+  text-align: right;
+  border-right: 4px solid var(--ifm-color-primary);
+  border-left: none;
+  padding-right: 1em;
+}
+
+/* Image captions */
+.translated-content-urdu figcaption {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .translated-content-urdu {
+  /* Slightly lighter text for better readability in dark mode */
+  color: var(--ifm-font-color-base);
+}
+
+/* Print styles */
+@media print {
+  .translated-content-urdu {
+    font-size: 12pt;
+    line-height: 2;
+  }
+
+  .translated-content-urdu pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .translated-content-urdu {
+    font-size: 1em;
+    line-height: 1.9;
+  }
+
+  .translated-content-urdu ul,
+  .translated-content-urdu ol {
+    padding-right: 1.5em;
+  }
+}

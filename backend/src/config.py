@@ -26,6 +26,11 @@ class Settings(BaseModel):
     openai_api_key: str = os.getenv("OPENAI_API_KEY", "")
     embedding_model: str = "text-embedding-3-small"
     chat_model: str = "gpt-4o-mini"
+    openai_model: str = os.getenv("OPENAI_MODEL", "gpt-4o")
+
+    # Personalization Cache (005-user-personalization)
+    personalization_cache_ttl: int = int(os.getenv("PERSONALIZATION_CACHE_TTL", "3600"))
+    translation_cache_ttl: int = int(os.getenv("TRANSLATION_CACHE_TTL", "3600"))
 
     # Better Auth
     better_auth_url: str = os.getenv("BETTER_AUTH_URL", "http://localhost:3000")

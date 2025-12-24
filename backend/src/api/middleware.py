@@ -170,6 +170,79 @@ class RateLimiter:
 rate_limiter = RateLimiter()
 
 
+class AIRateLimiter:
+    """
+    Dedicated rate limiter for AI endpoints (personalization/translation).
+
+    Uses per-user token bucket with configurable limits.
+    Returns retry_after time for better client handling.
+    """
+
+    def __init__(self, max_requests: int = 10, window_seconds: int = 60):
+        self.max_requests = max_requests
+        self.window_seconds = window_seconds
+        self._requests: dict[str, list[float]] = {}
+
+    def is_allowed(self, user_id: str) -> tuple[bool, int]:
+        """
+        Check if request is allowed for user.
+
+        Args:
+            user_id: The user identifier to check.
+
+        Returns:
+            Tuple of (allowed: bool, retry_after_seconds: int)
+        """
+        import time
+
+        current_time = time.time()
+        window_start = current_time - self.window_seconds
+
+        # Get or create user's request history
+        if user_id not in self._requests:
+            self._requests[user_id] = []
+
+        # Clean old requests outside window
+        self._requests[user_id] = [
+            req_time
+            for req_time in self._requests[user_id]
+            if req_time > window_start
+        ]
+
+        # Check if within limit
+        if len(self._requests[user_id]) >= self.max_requests:
+            # Calculate retry_after based on oldest request in window
+            oldest = min(self._requests[user_id])
+            retry_after = int(oldest + self.window_seconds - current_time) + 1
+            return False, max(retry_after, 1)
+
+        # Record new request
+        self._requests[user_id].append(current_time)
+        return True, 0
+
+    def get_remaining(self, user_id: str) -> int:
+        """Get remaining requests for user in current window."""
+        import time
+
+        current_time = time.time()
+        window_start = current_time - self.window_seconds
+
+        if user_id not in self._requests:
+            return self.max_requests
+
+        # Count requests in window
+        recent_requests = [
+            req_time
+            for req_time in self._requests[user_id]
+            if req_time > window_start
+        ]
+        return max(0, self.max_requests - len(recent_requests))
+
+
+# Global AI rate limiter instance (10 requests per minute)
+ai_rate_limiter = AIRateLimiter(max_requests=10, window_seconds=60)
+
+
 async def check_rate_limit(
     user: AuthenticatedUser = Depends(get_current_user),
 ) -> AuthenticatedUser:

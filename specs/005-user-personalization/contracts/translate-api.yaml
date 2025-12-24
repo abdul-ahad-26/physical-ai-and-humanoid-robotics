@@ -1,0 +1,209 @@
+openapi: 3.0.3
+info:
+  title: Translation API
+  description: AI-powered content translation endpoint (Urdu)
+  version: 1.0.0
+  contact:
+    name: Physical AI Textbook Team
+
+servers:
+  - url: http://localhost:8000
+    description: Development server
+  - url: https://api.physicalai.dev
+    description: Production server
+
+paths:
+  /api/translate:
+    post:
+      summary: Translate chapter content to Urdu
+      description: |
+        Translate chapter content to Urdu while preserving technical accuracy.
+
+        **Rate Limit**: 10 requests per minute per user.
+
+        **Requirements**:
+        - User must be authenticated
+        - Profile completion NOT required (unlike personalization)
+
+        **Behavior**:
+        - Prose content is translated to Urdu
+        - Code blocks are preserved exactly as-is
+        - Technical terms are kept in English with Urdu transliteration
+        - URLs, file paths, and commands are preserved
+        - Results are cached for the session duration
+        - RTL direction markers are added for proper rendering
+      operationId: translateContent
+      tags:
+        - Translation
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TranslateRequest'
+            example:
+              chapter_id: "chapter-3"
+              content: "# Neural Networks\n\nNeural networks are computational models...\n\n```python\nimport tensorflow as tf\n```"
+              target_language: "ur"
+      responses:
+        '200':
+          description: Content translated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranslateResponse'
+              example:
+                success: true
+                translated_content: "# نیورل نیٹ ورکس\n\nنیورل نیٹ ورکس (Neural Networks) کمپیوٹیشنل ماڈلز ہیں...\n\n```python\nimport tensorflow as tf\n```"
+                metadata:
+                  source_language: "en"
+                  target_language: "ur"
+                  preserved_blocks: 1
+                  cached: false
+                  response_time_ms: 5200
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Unsupported target language. Only 'ur' (Urdu) is supported."
+                code: "UNSUPPORTED_LANGUAGE"
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Not authenticated"
+                code: "UNAUTHORIZED"
+        '429':
+          description: Rate limit exceeded
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Seconds until rate limit resets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Rate limit exceeded. Try again in 45 seconds."
+                code: "RATE_LIMITED"
+        '500':
+          description: AI service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Translation service unavailable. Please try again."
+                code: "AI_SERVICE_ERROR"
+        '504':
+          description: AI service timeout
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Translation request timed out. Please try again."
+                code: "AI_TIMEOUT"
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: session
+      description: Session token cookie set by authentication
+
+  schemas:
+    TranslateRequest:
+      type: object
+      required:
+        - chapter_id
+        - content
+        - target_language
+      properties:
+        chapter_id:
+          type: string
+          maxLength: 100
+          description: Unique identifier for the chapter (e.g., "chapter-3")
+          example: "chapter-3"
+        content:
+          type: string
+          minLength: 1
+          maxLength: 100000
+          description: Original markdown content of the chapter
+        target_language:
+          type: string
+          enum: [ur]
+          description: Target language code (currently only Urdu 'ur' is supported)
+          example: "ur"
+
+    TranslateResponse:
+      type: object
+      required:
+        - success
+        - translated_content
+        - metadata
+      properties:
+        success:
+          type: boolean
+          description: Whether translation was successful
+        translated_content:
+          type: string
+          description: Translated markdown content with RTL markers
+        metadata:
+          $ref: '#/components/schemas/TranslationMetadata'
+
+    TranslationMetadata:
+      type: object
+      properties:
+        source_language:
+          type: string
+          description: Detected source language
+          example: "en"
+        target_language:
+          type: string
+          description: Target language used for translation
+          example: "ur"
+        preserved_blocks:
+          type: integer
+          description: Number of code blocks preserved unchanged
+          example: 3
+        cached:
+          type: boolean
+          description: Whether the response was served from cache
+        response_time_ms:
+          type: integer
+          description: Time taken to generate the response in milliseconds
+
+    Error:
+      type: object
+      required:
+        - error
+        - code
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+        code:
+          type: string
+          description: Machine-readable error code
+          enum:
+            - VALIDATION_ERROR
+            - UNSUPPORTED_LANGUAGE
+            - UNAUTHORIZED
+            - RATE_LIMITED
+            - AI_SERVICE_ERROR
+            - AI_TIMEOUT
+
+tags:
+  - name: Translation
+    description: AI-powered content translation operations

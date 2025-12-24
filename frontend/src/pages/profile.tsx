@@ -1,37 +1,106 @@
 /**
  * Profile Settings Page
  *
- * Allows authenticated users to view and update their profile settings.
+ * Allows authenticated users to view and update their profile settings:
+ * - Display name
+ * - Software background (level, languages, frameworks)
+ * - Hardware background (level, domains)
+ *
  * Email/password users can set their display name here.
- * OAuth users see their provider-sourced display name (read-only explanation).
+ * OAuth users see their provider-sourced display name (can be changed).
+ *
+ * Updated for 005-user-personalization feature.
  */
 
 import React, { useState, useEffect } from "react";
 import { useHistory } from "@docusaurus/router";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import { useSession } from "@site/src/lib/auth";
+import {
+  getProfile,
+  updateProfile,
+  UserProfile,
+  ProfileUpdateRequest,
+} from "@site/src/lib/personalization";
 import styles from "./login.module.css";
 
-interface ProfileData {
-  id: string;
-  email: string;
-  display_name: string | null;
-  auth_provider: string;
-}
+// Options for dropdowns - same as ProfileWizard
+const SOFTWARE_LEVELS = [
+  { value: "beginner", label: "Beginner - New to programming" },
+  { value: "intermediate", label: "Intermediate - 1-3 years experience" },
+  { value: "advanced", label: "Advanced - 3+ years experience" },
+];
+
+const PROGRAMMING_LANGUAGES = [
+  "Python",
+  "JavaScript",
+  "TypeScript",
+  "C++",
+  "C",
+  "Java",
+  "Go",
+  "Rust",
+  "Ruby",
+  "Other",
+];
+
+const FRAMEWORKS = [
+  "ROS/ROS2",
+  "PyTorch",
+  "TensorFlow",
+  "React",
+  "FastAPI",
+  "Django",
+  "Express",
+  "Unity",
+  "Other",
+];
+
+const HARDWARE_LEVELS = [
+  { value: "none", label: "No Experience" },
+  { value: "basic", label: "Basic - Hobbyist level" },
+  { value: "intermediate", label: "Intermediate - Some projects" },
+  { value: "advanced", label: "Advanced - Professional experience" },
+];
+
+const HARDWARE_DOMAINS = [
+  "Arduino/Microcontrollers",
+  "Raspberry Pi",
+  "Robotics",
+  "Embedded Systems",
+  "PCB Design",
+  "Sensors/Actuators",
+  "3D Printing",
+  "Other",
+];
 
 export default function ProfilePage(): JSX.Element {
   const { data: session, isPending } = useSession();
   const history = useHistory();
-  const [displayName, setDisplayName] = useState("");
-  const [originalDisplayName, setOriginalDisplayName] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [profile, setProfile] = useState<ProfileData | null>(null);
 
   // Get API URL from Docusaurus context
   const { siteConfig } = useDocusaurusContext();
   const apiUrl = (siteConfig.customFields?.apiUrl as string) || "http://localhost:8000";
+
+  // State
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  // Profile data
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [displayName, setDisplayName] = useState("");
+  const [originalDisplayName, setOriginalDisplayName] = useState("");
+
+  // Software background
+  const [softwareLevel, setSoftwareLevel] = useState("");
+  const [languages, setLanguages] = useState<string[]>([]);
+  const [frameworks, setFrameworks] = useState<string[]>([]);
+
+  // Hardware background
+  const [hardwareLevel, setHardwareLevel] = useState("");
+  const [domains, setDomains] = useState<string[]>([]);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -43,74 +112,121 @@ export default function ProfilePage(): JSX.Element {
   // Load profile data
   useEffect(() => {
     const loadProfile = async () => {
-      if (!session) return;
+      if (!session || isPending) return;
 
       try {
-        const response = await fetch(`${apiUrl}/api/auth/profile`, {
-          credentials: "include",
-        });
+        setLoading(true);
+        const profileData = await getProfile(apiUrl);
+        setProfile(profileData);
 
-        if (response.ok) {
-          const data = await response.json();
-          setProfile(data.user);
-          setDisplayName(data.user.display_name || "");
-          setOriginalDisplayName(data.user.display_name || "");
+        // Set form values
+        setDisplayName(profileData.display_name || "");
+        setOriginalDisplayName(profileData.display_name || "");
+
+        if (profileData.software_background) {
+          setSoftwareLevel(profileData.software_background.level || "");
+          setLanguages(profileData.software_background.languages || []);
+          setFrameworks(profileData.software_background.frameworks || []);
         }
-      } catch (err) {
+
+        if (profileData.hardware_background) {
+          setHardwareLevel(profileData.hardware_background.level || "");
+          setDomains(profileData.hardware_background.domains || []);
+        }
+      } catch (err: any) {
         console.error("Failed to load profile:", err);
+        setError(err.message || "Failed to load profile");
+      } finally {
+        setLoading(false);
       }
     };
 
     loadProfile();
-  }, [session, apiUrl]);
+  }, [session, isPending, apiUrl]);
 
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess("");
 
-    if (displayName.trim().length === 0) {
-      setError("Display name cannot be empty");
+    // Validation
+    if (!displayName.trim()) {
+      setError("Display name is required");
       return;
     }
-
-    if (displayName.trim().length > 100) {
+    if (displayName.length > 100) {
       setError("Display name must be 100 characters or less");
       return;
     }
+    if (!softwareLevel) {
+      setError("Please select your software experience level");
+      return;
+    }
+    if (!hardwareLevel) {
+      setError("Please select your hardware experience level");
+      return;
+    }
 
-    setLoading(true);
+    setSaving(true);
 
     try {
-      const response = await fetch(`${apiUrl}/api/auth/profile`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ display_name: displayName.trim() }),
-      });
+      const request: ProfileUpdateRequest = {
+        display_name: displayName.trim(),
+        software_background: {
+          level: softwareLevel as "beginner" | "intermediate" | "advanced",
+          languages,
+          frameworks,
+        },
+        hardware_background: {
+          level: hardwareLevel as "none" | "basic" | "intermediate" | "advanced",
+          domains,
+        },
+      };
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error?.message || "Failed to update profile");
-      }
+      const response = await updateProfile(request, apiUrl);
+      setProfile(response.user);
+      setOriginalDisplayName(response.user.display_name || "");
+      setSuccess("Profile updated successfully!");
 
-      const data = await response.json();
-      setProfile(data.user);
-      setOriginalDisplayName(data.user.display_name || "");
-      setSuccess("Profile updated successfully! Refresh to see changes in navbar.");
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccess(""), 3000);
     } catch (err: any) {
       setError(err.message || "Failed to update profile");
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
-  const hasChanges = displayName.trim() !== originalDisplayName;
+  // Handle multi-select toggle
+  const toggleSelection = (
+    item: string,
+    current: string[],
+    setter: React.Dispatch<React.SetStateAction<string[]>>
+  ) => {
+    if (current.includes(item)) {
+      setter(current.filter((i) => i !== item));
+    } else {
+      setter([...current, item]);
+    }
+  };
 
-  if (isPending) {
+  // Check if form has changes
+  const hasChanges =
+    displayName.trim() !== originalDisplayName ||
+    softwareLevel !== (profile?.software_background?.level || "") ||
+    hardwareLevel !== (profile?.hardware_background?.level || "") ||
+    JSON.stringify(languages.sort()) !==
+      JSON.stringify((profile?.software_background?.languages || []).sort()) ||
+    JSON.stringify(frameworks.sort()) !==
+      JSON.stringify((profile?.software_background?.frameworks || []).sort()) ||
+    JSON.stringify(domains.sort()) !==
+      JSON.stringify((profile?.hardware_background?.domains || []).sort());
+
+  if (isPending || loading) {
     return (
       <div className={styles.container}>
-        <div className={styles.card}>
+        <div className={styles.card} style={{ maxWidth: "700px" }}>
           <p style={{ textAlign: "center", color: "#666" }}>Loading...</p>
         </div>
       </div>
@@ -125,52 +241,67 @@ export default function ProfilePage(): JSX.Element {
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
+      <div className={styles.card} style={{ maxWidth: "700px" }}>
         <h1>Profile Settings</h1>
-        <p className={styles.subtitle}>Manage your account information</p>
+        <p className={styles.subtitle}>
+          Update your profile to personalize your learning experience
+        </p>
 
         {/* Account Info */}
-        <div style={{ marginBottom: "1.5rem" }}>
-          <div
-            style={{
-              padding: "1rem",
-              backgroundColor: "#f8f9fa",
-              borderRadius: "8px",
-              marginBottom: "1rem",
-            }}
-          >
-            <div style={{ marginBottom: "0.5rem" }}>
-              <strong style={{ color: "#333" }}>Email:</strong>{" "}
-              <span style={{ color: "#666" }}>{profile?.email || session.user?.email}</span>
-            </div>
-            <div>
-              <strong style={{ color: "#333" }}>Sign-in method:</strong>{" "}
-              <span
-                style={{
-                  display: "inline-block",
-                  padding: "0.125rem 0.5rem",
-                  backgroundColor:
-                    profile?.auth_provider === "google"
-                      ? "#ea4335"
-                      : profile?.auth_provider === "github"
-                      ? "#24292f"
-                      : "#10B981",
-                  color: "white",
-                  borderRadius: "4px",
-                  fontSize: "0.75rem",
-                  textTransform: "capitalize",
-                }}
-              >
-                {profile?.auth_provider || "email"}
-              </span>
-            </div>
+        <div
+          style={{
+            padding: "1rem",
+            backgroundColor: "#f8f9fa",
+            borderRadius: "8px",
+            marginBottom: "1.5rem",
+          }}
+        >
+          <div style={{ marginBottom: "0.5rem" }}>
+            <strong style={{ color: "#333" }}>Email:</strong>{" "}
+            <span style={{ color: "#666" }}>{profile?.email || session.user?.email}</span>
+          </div>
+          <div style={{ marginBottom: "0.5rem" }}>
+            <strong style={{ color: "#333" }}>Sign-in method:</strong>{" "}
+            <span
+              style={{
+                display: "inline-block",
+                padding: "0.125rem 0.5rem",
+                backgroundColor:
+                  profile?.auth_provider === "google"
+                    ? "#ea4335"
+                    : profile?.auth_provider === "github"
+                    ? "#24292f"
+                    : "#10B981",
+                color: "white",
+                borderRadius: "4px",
+                fontSize: "0.75rem",
+                textTransform: "capitalize",
+              }}
+            >
+              {profile?.auth_provider || "email"}
+            </span>
+          </div>
+          <div>
+            <strong style={{ color: "#333" }}>Profile Status:</strong>{" "}
+            <span
+              style={{
+                display: "inline-block",
+                padding: "0.125rem 0.5rem",
+                backgroundColor: profile?.profile_completed ? "#10B981" : "#f59e0b",
+                color: "white",
+                borderRadius: "4px",
+                fontSize: "0.75rem",
+              }}
+            >
+              {profile?.profile_completed ? "Complete" : "Incomplete"}
+            </span>
           </div>
         </div>
 
-        {/* Display Name Form */}
         <form onSubmit={handleSubmit}>
+          {/* Display Name */}
           <div className={styles.field}>
-            <label htmlFor="displayName">Display Name</label>
+            <label htmlFor="displayName">Display Name *</label>
             <input
               id="displayName"
               type="text"
@@ -178,26 +309,181 @@ export default function ProfilePage(): JSX.Element {
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               maxLength={100}
-              disabled={loading}
+              disabled={saving}
             />
-            <p
-              style={{
-                fontSize: "0.8rem",
-                color: "#666",
-                marginTop: "0.25rem",
-              }}
-            >
-              This name will be shown in the navbar when you're logged in.
+            <p style={{ fontSize: "0.8rem", color: "#666", marginTop: "0.25rem" }}>
+              {displayName.length}/100 characters
               {isOAuthUser && (
                 <span style={{ display: "block", marginTop: "0.25rem" }}>
-                  Your name was imported from {profile?.auth_provider}, but you can change it here.
+                  Your name was imported from {profile?.auth_provider}, but you can change it.
                 </span>
               )}
             </p>
           </div>
 
+          {/* Software Background Section */}
+          <div
+            style={{
+              padding: "1.5rem",
+              backgroundColor: "#f8f9fa",
+              borderRadius: "8px",
+              marginBottom: "1.5rem",
+            }}
+          >
+            <h3 style={{ marginTop: 0, marginBottom: "1rem" }}>Software Background</h3>
+
+            {/* Software Level */}
+            <div className={styles.field}>
+              <label htmlFor="softwareLevel">Experience Level *</label>
+              <select
+                id="softwareLevel"
+                value={softwareLevel}
+                onChange={(e) => setSoftwareLevel(e.target.value)}
+                disabled={saving}
+                style={{
+                  width: "100%",
+                  padding: "0.75rem",
+                  fontSize: "1rem",
+                  border: "1px solid #e1e1e1",
+                  borderRadius: "8px",
+                  backgroundColor: "white",
+                }}
+              >
+                <option value="">Select your level...</option>
+                {SOFTWARE_LEVELS.map((level) => (
+                  <option key={level.value} value={level.value}>
+                    {level.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Languages */}
+            <div style={{ marginBottom: "1rem" }}>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: 500 }}>
+                Programming Languages
+              </label>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+                {PROGRAMMING_LANGUAGES.map((lang) => (
+                  <button
+                    key={lang}
+                    type="button"
+                    onClick={() => toggleSelection(lang, languages, setLanguages)}
+                    disabled={saving}
+                    style={{
+                      padding: "0.5rem 1rem",
+                      border: languages.includes(lang)
+                        ? "2px solid #10B981"
+                        : "1px solid #ddd",
+                      borderRadius: "20px",
+                      backgroundColor: languages.includes(lang) ? "#ecfdf5" : "white",
+                      cursor: saving ? "not-allowed" : "pointer",
+                      opacity: saving ? 0.7 : 1,
+                    }}
+                  >
+                    {lang}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Frameworks */}
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: 500 }}>
+                Frameworks & Tools
+              </label>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+                {FRAMEWORKS.map((fw) => (
+                  <button
+                    key={fw}
+                    type="button"
+                    onClick={() => toggleSelection(fw, frameworks, setFrameworks)}
+                    disabled={saving}
+                    style={{
+                      padding: "0.5rem 1rem",
+                      border: frameworks.includes(fw) ? "2px solid #10B981" : "1px solid #ddd",
+                      borderRadius: "20px",
+                      backgroundColor: frameworks.includes(fw) ? "#ecfdf5" : "white",
+                      cursor: saving ? "not-allowed" : "pointer",
+                      opacity: saving ? 0.7 : 1,
+                    }}
+                  >
+                    {fw}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Hardware Background Section */}
+          <div
+            style={{
+              padding: "1.5rem",
+              backgroundColor: "#f8f9fa",
+              borderRadius: "8px",
+              marginBottom: "1.5rem",
+            }}
+          >
+            <h3 style={{ marginTop: 0, marginBottom: "1rem" }}>Hardware Background</h3>
+
+            {/* Hardware Level */}
+            <div className={styles.field}>
+              <label htmlFor="hardwareLevel">Experience Level *</label>
+              <select
+                id="hardwareLevel"
+                value={hardwareLevel}
+                onChange={(e) => setHardwareLevel(e.target.value)}
+                disabled={saving}
+                style={{
+                  width: "100%",
+                  padding: "0.75rem",
+                  fontSize: "1rem",
+                  border: "1px solid #e1e1e1",
+                  borderRadius: "8px",
+                  backgroundColor: "white",
+                }}
+              >
+                <option value="">Select your level...</option>
+                {HARDWARE_LEVELS.map((level) => (
+                  <option key={level.value} value={level.value}>
+                    {level.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Domains */}
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: 500 }}>
+                Hardware Domains
+              </label>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+                {HARDWARE_DOMAINS.map((domain) => (
+                  <button
+                    key={domain}
+                    type="button"
+                    onClick={() => toggleSelection(domain, domains, setDomains)}
+                    disabled={saving}
+                    style={{
+                      padding: "0.5rem 1rem",
+                      border: domains.includes(domain) ? "2px solid #10B981" : "1px solid #ddd",
+                      borderRadius: "20px",
+                      backgroundColor: domains.includes(domain) ? "#ecfdf5" : "white",
+                      cursor: saving ? "not-allowed" : "pointer",
+                      opacity: saving ? 0.7 : 1,
+                    }}
+                  >
+                    {domain}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Error Message */}
           {error && <div className={styles.error}>{error}</div>}
 
+          {/* Success Message */}
           {success && (
             <div
               style={{
@@ -215,20 +501,38 @@ export default function ProfilePage(): JSX.Element {
             </div>
           )}
 
-          <button
-            type="submit"
-            disabled={loading || !hasChanges}
-            className={styles.button}
-            style={{
-              opacity: loading || !hasChanges ? 0.6 : 1,
-              cursor: loading || !hasChanges ? "not-allowed" : "pointer",
-            }}
-          >
-            {loading ? "Saving..." : "Save Changes"}
-          </button>
+          {/* Buttons */}
+          <div style={{ display: "flex", gap: "1rem", justifyContent: "flex-end" }}>
+            <button
+              type="button"
+              onClick={() => history.push("/")}
+              style={{
+                padding: "0.75rem 1.5rem",
+                backgroundColor: "#f3f4f6",
+                color: "#374151",
+                border: "none",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontWeight: 500,
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving || !hasChanges}
+              className={styles.button}
+              style={{
+                opacity: saving || !hasChanges ? 0.6 : 1,
+                cursor: saving || !hasChanges ? "not-allowed" : "pointer",
+              }}
+            >
+              {saving ? "Saving..." : "Save Changes"}
+            </button>
+          </div>
         </form>
 
-        <p className={styles.link} style={{ marginTop: "2rem" }}>
+        <p className={styles.link} style={{ marginTop: "2rem", textAlign: "center" }}>
           <a href="/">Back to Home</a>
         </p>
       </div>

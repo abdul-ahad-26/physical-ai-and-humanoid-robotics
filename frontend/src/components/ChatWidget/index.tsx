@@ -13,6 +13,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+import styles from './ChatWidget.module.css';
 
 interface ChatWidgetProps {
   /** Whether the user is authenticated */
@@ -158,7 +159,7 @@ export function ChatWidget({
         position: 'fixed',
         bottom: '1rem',
         right: '1rem',
-        zIndex: 9999,
+        zIndex: 10000,
       }}
     >
       {/* Toggle Button - Always visible */}
@@ -166,28 +167,7 @@ export function ChatWidget({
         <button
           onClick={() => setIsOpen(true)}
           aria-label="Open chat"
-          style={{
-            width: '56px',
-            height: '56px',
-            borderRadius: '50%',
-            backgroundColor: '#10B981',
-            color: 'white',
-            border: 'none',
-            cursor: 'pointer',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'transform 0.2s, box-shadow 0.2s',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scale(1.05)';
-            e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.2)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
-          }}
+          className={styles.toggleButton}
         >
           <svg
             width="24"
@@ -206,41 +186,14 @@ export function ChatWidget({
 
       {/* Login Prompt Panel - Shown when not authenticated */}
       {isOpen && !isLoggedIn && (
-        <div
-          style={{
-            width: '360px',
-            height: 'auto',
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-          }}
-        >
+        <div className={styles.loginPromptPanel}>
           {/* Header */}
-          <div
-            style={{
-              padding: '1rem',
-              borderBottom: '1px solid #e5e7eb',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              backgroundColor: '#10B981',
-              color: 'white',
-            }}
-          >
+          <div className={styles.chatHeader}>
             <span style={{ fontWeight: 600 }}>Textbook Assistant</span>
             <button
               onClick={() => setIsOpen(false)}
               aria-label="Close chat"
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'white',
-                cursor: 'pointer',
-                padding: '4px',
-              }}
+              className={styles.closeButton}
             >
               <svg
                 width="20"
@@ -257,54 +210,33 @@ export function ChatWidget({
           </div>
 
           {/* Login Prompt Content */}
-          <div
-            style={{
-              padding: '2rem',
-              textAlign: 'center',
-            }}
-          >
+          <div className={styles.loginPromptContent}>
             <svg
+              className={styles.loginPromptIcon}
               width="48"
               height="48"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#10B981"
               strokeWidth="1.5"
-              style={{ marginBottom: '1rem' }}
             >
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
               <circle cx="12" cy="7" r="4" />
             </svg>
-            <h3 style={{ margin: '0 0 0.5rem 0', color: '#1f2937' }}>
+            <h3 className={styles.loginPromptTitle}>
               Login Required
             </h3>
-            <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: '0 0 1.5rem 0' }}>
+            <p className={styles.loginPromptText}>
               Please log in to use the AI textbook assistant and ask questions about the content.
             </p>
             <a
               href="/login"
-              style={{
-                display: 'inline-block',
-                padding: '0.75rem 1.5rem',
-                backgroundColor: '#10B981',
-                color: 'white',
-                textDecoration: 'none',
-                borderRadius: '8px',
-                fontWeight: 500,
-                transition: 'background-color 0.2s',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#059669';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#10B981';
-              }}
+              className={styles.loginButton}
             >
               Log In
             </a>
-            <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginTop: '1rem' }}>
+            <p className={styles.signupPrompt}>
               Don't have an account?{' '}
-              <a href="/signup" style={{ color: '#10B981' }}>
+              <a href="/signup" className={styles.signupLink}>
                 Sign up
               </a>
             </p>
@@ -314,41 +246,14 @@ export function ChatWidget({
 
       {/* Chat Panel - Only shown when authenticated */}
       {isOpen && isLoggedIn && (
-        <div
-          style={{
-            width: '360px',
-            height: '600px',
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-          }}
-        >
+        <div className={styles.chatPanel} style={{ height: '600px' }}>
           {/* Header */}
-          <div
-            style={{
-              padding: '1rem',
-              borderBottom: '1px solid #e5e7eb',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              backgroundColor: '#10B981',
-              color: 'white',
-            }}
-          >
+          <div className={styles.chatHeader}>
             <span style={{ fontWeight: 600 }}>Textbook Assistant</span>
             <button
               onClick={() => setIsOpen(false)}
               aria-label="Close chat"
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'white',
-                cursor: 'pointer',
-                padding: '4px',
-              }}
+              className={styles.closeButton}
             >
               <svg
                 width="20"
@@ -413,31 +318,16 @@ export function ChatWidget({
           )}
 
           {/* Chat Messages Area */}
-          <div
-            style={{
-              flex: 1,
-              overflowY: 'auto',
-              padding: '1rem',
-              backgroundColor: '#f9fafb',
-            }}
-          >
+          <div className={styles.messagesArea}>
             {messages.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
-                <p style={{ marginBottom: '1rem', fontWeight: 500 }}>Ask me about the textbook!</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <div className={styles.emptyState}>
+                <p className={styles.emptyStateTitle}>Ask me about the textbook!</p>
+                <div className={styles.promptButtons}>
                   {['💡 Can you explain ', '🔍 Where can I learn about ', '📄 Summarize the section on '].map((prompt, idx) => (
                     <button
                       key={idx}
                       onClick={() => setInputValue(prompt)}
-                      style={{
-                        padding: '0.5rem 1rem',
-                        backgroundColor: 'white',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        fontSize: '0.875rem',
-                        textAlign: 'left',
-                      }}
+                      className={styles.promptButton}
                     >
                       {prompt}
                     </button>
@@ -449,21 +339,10 @@ export function ChatWidget({
                 {messages.map((msg, idx) => (
                   <div
                     key={idx}
-                    style={{
-                      marginBottom: '1rem',
-                      display: 'flex',
-                      justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                    }}
+                    className={`${styles.messageContainer} ${msg.role === 'user' ? styles.messageContainerUser : styles.messageContainerAssistant}`}
                   >
                     <div
-                      style={{
-                        maxWidth: '80%',
-                        padding: '0.75rem 1rem',
-                        borderRadius: '12px',
-                        backgroundColor: msg.role === 'user' ? '#10B981' : 'white',
-                        color: msg.role === 'user' ? 'white' : '#1f2937',
-                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-                      }}
+                      className={`${styles.message} ${msg.role === 'user' ? styles.messageUser : styles.messageAssistant}`}
                     >
                       <div style={{ fontSize: '0.875rem', lineHeight: '1.5' }}>
                         {msg.role === 'assistant' ? (
@@ -513,14 +392,8 @@ export function ChatWidget({
           </div>
 
           {/* Input Area */}
-          <div
-            style={{
-              padding: '1rem',
-              borderTop: '1px solid #e5e7eb',
-              backgroundColor: 'white',
-            }}
-          >
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end' }}>
+          <div className={styles.inputArea}>
+            <div className={styles.inputContainer}>
               <textarea
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
@@ -528,34 +401,12 @@ export function ChatWidget({
                 placeholder="Ask a question about the book..."
                 disabled={isLoadingMessage}
                 rows={2}
-                style={{
-                  flex: 1,
-                  padding: '0.75rem',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
-                  resize: 'none',
-                  fontSize: '0.875rem',
-                  fontFamily: 'inherit',
-                  outline: 'none',
-                }}
-                onFocus={(e) => e.target.style.borderColor = '#10B981'}
-                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                className={styles.textarea}
               />
               <button
                 onClick={sendMessage}
                 disabled={!inputValue.trim() || isLoadingMessage}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  backgroundColor: inputValue.trim() && !isLoadingMessage ? '#10B981' : '#d1d5db',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: inputValue.trim() && !isLoadingMessage ? 'pointer' : 'not-allowed',
-                  fontWeight: 500,
-                  fontSize: '0.875rem',
-                  whiteSpace: 'nowrap',
-                  transition: 'background-color 0.2s',
-                }}
+                className={`${styles.sendButton} ${inputValue.trim() && !isLoadingMessage ? styles.sendButtonEnabled : styles.sendButtonDisabled}`}
               >
                 {isLoadingMessage ? 'Sending...' : 'Send'}
               </button>
