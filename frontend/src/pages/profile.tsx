@@ -227,7 +227,7 @@ export default function ProfilePage(): JSX.Element {
     return (
       <div className={styles.container}>
         <div className={styles.card} style={{ maxWidth: "700px" }}>
-          <p style={{ textAlign: "center", color: "#666" }}>Loading...</p>
+          <p className={styles.infoValue} style={{ textAlign: "center" }}>Loading...</p>
         </div>
       </div>
     );
@@ -248,20 +248,13 @@ export default function ProfilePage(): JSX.Element {
         </p>
 
         {/* Account Info */}
-        <div
-          style={{
-            padding: "1rem",
-            backgroundColor: "#f8f9fa",
-            borderRadius: "8px",
-            marginBottom: "1.5rem",
-          }}
-        >
+        <div className={styles.infoBox}>
           <div style={{ marginBottom: "0.5rem" }}>
-            <strong style={{ color: "#333" }}>Email:</strong>{" "}
-            <span style={{ color: "#666" }}>{profile?.email || session.user?.email}</span>
+            <strong className={styles.infoLabel}>Email:</strong>{" "}
+            <span className={styles.infoValue}>{profile?.email || session.user?.email}</span>
           </div>
           <div style={{ marginBottom: "0.5rem" }}>
-            <strong style={{ color: "#333" }}>Sign-in method:</strong>{" "}
+            <strong className={styles.infoLabel}>Sign-in method:</strong>{" "}
             <span
               style={{
                 display: "inline-block",
@@ -271,7 +264,7 @@ export default function ProfilePage(): JSX.Element {
                     ? "#ea4335"
                     : profile?.auth_provider === "github"
                     ? "#24292f"
-                    : "#10B981",
+                    : "#2d7a4e",
                 color: "white",
                 borderRadius: "4px",
                 fontSize: "0.75rem",
@@ -282,12 +275,12 @@ export default function ProfilePage(): JSX.Element {
             </span>
           </div>
           <div>
-            <strong style={{ color: "#333" }}>Profile Status:</strong>{" "}
+            <strong className={styles.infoLabel}>Profile Status:</strong>{" "}
             <span
               style={{
                 display: "inline-block",
                 padding: "0.125rem 0.5rem",
-                backgroundColor: profile?.profile_completed ? "#10B981" : "#f59e0b",
+                backgroundColor: profile?.profile_completed ? "#2d7a4e" : "#f59e0b",
                 color: "white",
                 borderRadius: "4px",
                 fontSize: "0.75rem",
@@ -311,7 +304,7 @@ export default function ProfilePage(): JSX.Element {
               maxLength={100}
               disabled={saving}
             />
-            <p style={{ fontSize: "0.8rem", color: "#666", marginTop: "0.25rem" }}>
+            <p className={styles.infoValue} style={{ fontSize: "0.8rem", marginTop: "0.25rem" }}>
               {displayName.length}/100 characters
               {isOAuthUser && (
                 <span style={{ display: "block", marginTop: "0.25rem" }}>
@@ -322,15 +315,8 @@ export default function ProfilePage(): JSX.Element {
           </div>
 
           {/* Software Background Section */}
-          <div
-            style={{
-              padding: "1.5rem",
-              backgroundColor: "#f8f9fa",
-              borderRadius: "8px",
-              marginBottom: "1.5rem",
-            }}
-          >
-            <h3 style={{ marginTop: 0, marginBottom: "1rem" }}>Software Background</h3>
+          <div className={styles.infoBox} style={{ padding: "1.5rem" }}>
+            <h3 className={styles.sectionTitle} style={{ marginTop: 0 }}>Software Background</h3>
 
             {/* Software Level */}
             <div className={styles.field}>
@@ -340,14 +326,7 @@ export default function ProfilePage(): JSX.Element {
                 value={softwareLevel}
                 onChange={(e) => setSoftwareLevel(e.target.value)}
                 disabled={saving}
-                style={{
-                  width: "100%",
-                  padding: "0.75rem",
-                  fontSize: "1rem",
-                  border: "1px solid #e1e1e1",
-                  borderRadius: "8px",
-                  backgroundColor: "white",
-                }}
+                className={styles.select}
               >
                 <option value="">Select your level...</option>
                 {SOFTWARE_LEVELS.map((level) => (
@@ -360,26 +339,18 @@ export default function ProfilePage(): JSX.Element {
 
             {/* Languages */}
             <div style={{ marginBottom: "1rem" }}>
-              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: 500 }}>
+              <label className={styles.infoLabel} style={{ display: "block", marginBottom: "0.5rem" }}>
                 Programming Languages
               </label>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+              <div className={styles.chipContainer}>
                 {PROGRAMMING_LANGUAGES.map((lang) => (
                   <button
                     key={lang}
                     type="button"
                     onClick={() => toggleSelection(lang, languages, setLanguages)}
                     disabled={saving}
-                    style={{
-                      padding: "0.5rem 1rem",
-                      border: languages.includes(lang)
-                        ? "2px solid #10B981"
-                        : "1px solid #ddd",
-                      borderRadius: "20px",
-                      backgroundColor: languages.includes(lang) ? "#ecfdf5" : "white",
-                      cursor: saving ? "not-allowed" : "pointer",
-                      opacity: saving ? 0.7 : 1,
-                    }}
+                    className={`${styles.chip} ${languages.includes(lang) ? styles.chipSelected : ''}`}
+                    style={{ opacity: saving ? 0.7 : 1 }}
                   >
                     {lang}
                   </button>
@@ -389,24 +360,18 @@ export default function ProfilePage(): JSX.Element {
 
             {/* Frameworks */}
             <div>
-              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: 500 }}>
+              <label className={styles.infoLabel} style={{ display: "block", marginBottom: "0.5rem" }}>
                 Frameworks & Tools
               </label>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+              <div className={styles.chipContainer}>
                 {FRAMEWORKS.map((fw) => (
                   <button
                     key={fw}
                     type="button"
                     onClick={() => toggleSelection(fw, frameworks, setFrameworks)}
                     disabled={saving}
-                    style={{
-                      padding: "0.5rem 1rem",
-                      border: frameworks.includes(fw) ? "2px solid #10B981" : "1px solid #ddd",
-                      borderRadius: "20px",
-                      backgroundColor: frameworks.includes(fw) ? "#ecfdf5" : "white",
-                      cursor: saving ? "not-allowed" : "pointer",
-                      opacity: saving ? 0.7 : 1,
-                    }}
+                    className={`${styles.chip} ${frameworks.includes(fw) ? styles.chipSelected : ''}`}
+                    style={{ opacity: saving ? 0.7 : 1 }}
                   >
                     {fw}
                   </button>
@@ -416,15 +381,8 @@ export default function ProfilePage(): JSX.Element {
           </div>
 
           {/* Hardware Background Section */}
-          <div
-            style={{
-              padding: "1.5rem",
-              backgroundColor: "#f8f9fa",
-              borderRadius: "8px",
-              marginBottom: "1.5rem",
-            }}
-          >
-            <h3 style={{ marginTop: 0, marginBottom: "1rem" }}>Hardware Background</h3>
+          <div className={styles.infoBox} style={{ padding: "1.5rem" }}>
+            <h3 className={styles.sectionTitle} style={{ marginTop: 0 }}>Hardware Background</h3>
 
             {/* Hardware Level */}
             <div className={styles.field}>
@@ -434,14 +392,7 @@ export default function ProfilePage(): JSX.Element {
                 value={hardwareLevel}
                 onChange={(e) => setHardwareLevel(e.target.value)}
                 disabled={saving}
-                style={{
-                  width: "100%",
-                  padding: "0.75rem",
-                  fontSize: "1rem",
-                  border: "1px solid #e1e1e1",
-                  borderRadius: "8px",
-                  backgroundColor: "white",
-                }}
+                className={styles.select}
               >
                 <option value="">Select your level...</option>
                 {HARDWARE_LEVELS.map((level) => (
@@ -454,24 +405,18 @@ export default function ProfilePage(): JSX.Element {
 
             {/* Domains */}
             <div>
-              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: 500 }}>
+              <label className={styles.infoLabel} style={{ display: "block", marginBottom: "0.5rem" }}>
                 Hardware Domains
               </label>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+              <div className={styles.chipContainer}>
                 {HARDWARE_DOMAINS.map((domain) => (
                   <button
                     key={domain}
                     type="button"
                     onClick={() => toggleSelection(domain, domains, setDomains)}
                     disabled={saving}
-                    style={{
-                      padding: "0.5rem 1rem",
-                      border: domains.includes(domain) ? "2px solid #10B981" : "1px solid #ddd",
-                      borderRadius: "20px",
-                      backgroundColor: domains.includes(domain) ? "#ecfdf5" : "white",
-                      cursor: saving ? "not-allowed" : "pointer",
-                      opacity: saving ? 0.7 : 1,
-                    }}
+                    className={`${styles.chip} ${domains.includes(domain) ? styles.chipSelected : ''}`}
+                    style={{ opacity: saving ? 0.7 : 1 }}
                   >
                     {domain}
                   </button>
@@ -485,18 +430,7 @@ export default function ProfilePage(): JSX.Element {
 
           {/* Success Message */}
           {success && (
-            <div
-              style={{
-                marginBottom: "1rem",
-                padding: "0.875rem 1rem",
-                background: "#d4edda",
-                border: "1px solid #c3e6cb",
-                borderLeft: "4px solid #28a745",
-                borderRadius: "8px",
-                color: "#155724",
-                fontSize: "0.9rem",
-              }}
-            >
+            <div className={styles.successMessage}>
               {success}
             </div>
           )}
@@ -506,15 +440,8 @@ export default function ProfilePage(): JSX.Element {
             <button
               type="button"
               onClick={() => history.push("/")}
-              style={{
-                padding: "0.75rem 1.5rem",
-                backgroundColor: "#f3f4f6",
-                color: "#374151",
-                border: "none",
-                borderRadius: "8px",
-                cursor: "pointer",
-                fontWeight: 500,
-              }}
+              className={styles.buttonSecondary}
+              style={{ width: "auto", padding: "0.75rem 1.5rem" }}
             >
               Cancel
             </button>
